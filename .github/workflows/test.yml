@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Install dependencies
+      run: |
+        cd server
+        go mod download
+        
+    - name: Run tests
+      run: |
+        cd server
+        go test -v ./...
+        
+    - name: Build server
+      run: |
+        cd server
+        go build -o websocket-server main.go
+        
+    - name: Test server startup
+      run: |
+        cd server
+        timeout 5s ./websocket-server || true

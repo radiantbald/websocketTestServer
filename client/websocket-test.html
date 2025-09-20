@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test - Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .connecting { background: #fff3cd; color: #856404; }
+        
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .sent { background: #d1ecf1; text-align: right; }
+        .received { background: #d4edda; }
+        .system { background: #fff3cd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Test (Simple)</h1>
+        
+        <div id="status" class="status disconnected">Отключено</div>
+        
+        <div>
+            <input type="text" id="username" placeholder="Имя пользователя" value="Тестировщик">
+            <button id="connectBtn" onclick="toggleConnection()">Подключиться</button>
+        </div>
+        
+        <div id="messageSection" style="display: none;">
+            <input type="text" id="messageInput" placeholder="Введите сообщение..." style="width: 70%;">
+            <button id="sendBtn" onclick="sendMessage()">Отправить</button>
+            
+            <div>
+                <button onclick="sendPing()">Ping</button>
+                <button onclick="sendEcho()">Echo</button>
+                <button onclick="clearMessages()">Очистить</button>
+            </div>
+        </div>
+        
+        <div class="messages" id="messages"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+            
+            const messageSection = document.getElementById('messageSection');
+            if (className === 'connected') {
+                messageSection.style.display = 'block';
+            } else {
+                messageSection.style.display = 'none';
+            }
+        }
+        
+        function addMessage(type, content, className = '') {
+            const messagesEl = document.getElementById('messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${className}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            messageEl.innerHTML = `<strong>[${timestamp}]</strong> ${content}`;
+            
+            messagesEl.appendChild(messageEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+        
+        function toggleConnection() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                disconnect();
+            } else {
+                connect();
+            }
+        }
+        
+        function connect() {
+            const username = document.getElementById('username').value || 'Anonymous';
+            const wsUrl = `ws://localhost:9090/ws?username=${encodeURIComponent(username)}`;
+            
+            console.log('🔌 Подключаемся к:', wsUrl);
+            updateStatus('Подключение...', 'connecting');
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function(event) {
+                console.log('✅ WebSocket подключен');
+                updateStatus('Подключено', 'connected');
+                document.getElementById('connectBtn').textContent = 'Отключиться';
+                addMessage('system', '✅ Подключено к WebSocket серверу');
+            };
+            
+            ws.onmessage = function(event) {
+                console.log('📨 Получено сообщение:', event.data);
+                try {
+                    const message = JSON.parse(event.data);
+                    addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
+                } catch (e) {
+                    addMessage('received', `Raw: ${event.data}`, 'received');
+                }
+            };
+            
+            ws.onclose = function(event) {
+                console.log('❌ WebSocket закрыт:', event.code, event.reason);
+                updateStatus('Отключено', 'disconnected');
+                document.getElementById('connectBtn').textContent = 'Подключиться';
+                addMessage('system', `❌ Соединение закрыто (код: ${event.code})`);
+            };
+            
+            ws.onerror = function(error) {
+                console.error('💥 WebSocket ошибка:', error);
+                addMessage('system', '💥 Ошибка WebSocket', 'system');
+            };
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (content && ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'chat',
+                    content: content
+                };
+                
+                const messageStr = JSON.stringify(message);
+                console.log('📤 Отправляем сообщение:', messageStr);
+                
+                ws.send(messageStr);
+                addMessage('sent', `Вы: ${content}`, 'sent');
+                input.value = '';
+            }
+        }
+        
+        function sendPing() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = { type: 'ping' };
+                const messageStr = JSON.stringify(message);
+                console.log('🏓 Отправляем ping:', messageStr);
+                ws.send(messageStr);
+                addMessage('system', '🏓 Отправлен ping');
+            }
+        }
+        
+        function sendEcho() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = { type: 'echo', content: 'Test echo message' };
+                const messageStr = JSON.stringify(message);
+                console.log('🔄 Отправляем echo:', messageStr);
+                ws.send(messageStr);
+                addMessage('system', '🔄 Отправлен echo');
+            }
+        }
+        
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+        
+        // Обработка Enter в поле ввода
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        console.log('🚀 WebSocket Test загружен');
+        addMessage('system', '🚀 WebSocket Test загружен. Нажмите "Подключиться" для начала тестирования.');
+    </script>
+</body>
+</html>
