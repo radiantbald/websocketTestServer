@@ -24,10 +24,17 @@ sudo cp "$NGINX_CONFIG" "$NGINX_CONFIG.backup.$(date +%Y%m%d-%H%M%S)"
 log "🗑️  Удаление дублирующихся блоков..."
 sudo sed -i '/location \/websocket {/,/}/d' "$NGINX_CONFIG"
 
-# Добавляем правильный WebSocket блок
+# Находим место для вставки (перед закрывающей скобкой server блока)
 log "📝 Добавление правильного WebSocket блока..."
-sudo tee -a "$NGINX_CONFIG" > /dev/null << 'EOF'
+# Создаем временный файл с правильным содержимым
+TEMP_FILE=$(mktemp)
 
+# Копируем содержимое до последней закрывающей скобки
+sudo sed '$d' "$NGINX_CONFIG" > "$TEMP_FILE"
+
+# Добавляем WebSocket блоки
+cat >> "$TEMP_FILE" << 'EOF'
+    
     # WebSocket проксирование
     location /websocket {
         # Проверяем, что это WebSocket запрос
@@ -59,7 +66,12 @@ sudo tee -a "$NGINX_CONFIG" > /dev/null << 'EOF'
         alias /var/www/qabase/client/test-client.html;
         try_files $uri =404;
     }
+}
 EOF
+
+# Заменяем оригинальный файл
+sudo cp "$TEMP_FILE" "$NGINX_CONFIG"
+rm "$TEMP_FILE"
 
 # Проверяем синтаксис
 log "🔍 Проверка синтаксиса..."
