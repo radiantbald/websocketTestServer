@@ -45,7 +45,7 @@ Proxyman перехватывает WebSocket соединения, но не п
 1. **Скачайте Charles Proxy**
 2. **Настройте прокси** на localhost:8888
 3. **Включите WebSocket перехват**
-4. **Измените URL в клиенте** на `ws://localhost:8888/ws`
+4. **Измените URL в клиенте** на `ws://localhost:8888/websocket`
 
 ## Проверка работы:
 

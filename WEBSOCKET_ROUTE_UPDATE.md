@@ -44,7 +44,7 @@ location / {
    - `client/test-client.html` 
    - `client/websocket-test.html`
    
-   Изменено с `ws://localhost:9090/ws` на `wss://qabase.ru/ws` для продакшена.
+   Изменено с `ws://localhost:9090/websocket` на `wss://qabase.ru/websocket` для продакшена.
 
 2. **Создан новый файл** `client/index.html` - красивая заглушка для главной страницы с:
    - Современным дизайном в стиле сайта
@@ -90,7 +90,7 @@ sudo chmod -R 755 /var/www/qabase/client
 Теперь пользователи могут:
 1. Заходить на **qabase.ru** - красивая главная страница с информацией о платформе
 2. Заходить на **qabase.ru/websocket** - страница с тестами WebSocket
-3. WebSocket соединение работает через **wss://qabase.ru/ws**
+3. WebSocket соединение работает через **wss://qabase.ru/websocket**
 4. Статус сервера доступен по **https://qabase.ru/status**
 
 **Важно:** Корневой путь `/` теперь зарезервирован под основной функционал платформы, а WebSocket тесты доступны только по специальному пути `/websocket`.

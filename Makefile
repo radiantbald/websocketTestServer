@@ -36,7 +36,7 @@ test: ## Протестировать сервер
 	@echo "$(YELLOW)Проверяем HTTP endpoints...$(NC)"
 	@curl -f -s http://localhost:9092/status > /dev/null && echo "$(GREEN)✅ /status работает$(NC)" || echo "$(RED)❌ /status не работает$(NC)"
 	@echo "$(YELLOW)Проверяем WebSocket endpoint...$(NC)"
-	@curl -f -s http://localhost:9092/ws > /dev/null && echo "$(GREEN)✅ /ws доступен$(NC)" || echo "$(RED)❌ /ws недоступен$(NC)"
+	@curl -f -s http://localhost:9092/websocket > /dev/null && echo "$(GREEN)✅ /websocket доступен$(NC)" || echo "$(RED)❌ /websocket недоступен$(NC)"
 
 clean: ## Очистить собранные файлы
 	@echo "$(GREEN)Очищаем собранные файлы...$(NC)"
@@ -163,11 +163,11 @@ info: ## Показать информацию о проекте
 	@echo ""
 	@echo "$(YELLOW)Основные endpoints:$(NC)"
 	@echo "  /           - Тестовый клиент"
-	@echo "  /ws         - WebSocket endpoint"
+	@echo "  /websocket  - WebSocket endpoint"
 	@echo "  /status     - Статус сервера"
 	@echo "  /simple     - Простой тестовый клиент"
 	@echo ""
 	@echo "$(YELLOW)Продакшен URLs:$(NC)"
 	@echo "  https://qabase.ru        - Основной сайт"
-	@echo "  wss://qabase.ru/ws       - WebSocket endpoint"
+	@echo "  wss://qabase.ru/websocket - WebSocket endpoint"
 	@echo "  https://qabase.ru/status - Статус сервера"

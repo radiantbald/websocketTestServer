@@ -115,7 +115,7 @@ sudo systemctl start websocket-server
 ```bash
 sudo systemctl status websocket-server
 curl -f https://qabase.ru/status
-wscat -c wss://qabase.ru/ws?username=test
+wscat -c wss://qabase.ru/websocket?username=test
 ```
 
 ## 🚨 Восстановление

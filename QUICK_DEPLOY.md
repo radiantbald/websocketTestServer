@@ -82,7 +82,7 @@ curl -f https://qabase.ru/status
 
 Ваш WebSocket сервер доступен по адресам:
 - **Сайт**: https://qabase.ru
-- **WebSocket**: wss://qabase.ru/ws
+- **WebSocket**: wss://qabase.ru/websocket
 - **Статус**: https://qabase.ru/status
 
 ## 🛠️ Управление

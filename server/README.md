@@ -41,7 +41,7 @@ Go-сервер для тестирования WebSocket соединений �
 
 ### WebSocket Endpoint
 
-- **URL**: `ws://localhost:9092/ws`
+- **URL**: `ws://localhost:9092/websocket`
 - **Параметры**: `?username=ИмяПользователя`
 
 ### REST Endpoints

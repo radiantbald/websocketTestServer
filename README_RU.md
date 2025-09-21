@@ -105,10 +105,10 @@
 ## API Эндпоинты
 
 ### WebSocket Эндпоинт
-- **URL**: `ws://localhost:8080/ws`
+- **URL**: `ws://localhost:8080/websocket`
 - **Параметры**: 
   - `username` (необязательный): Установить пользовательское имя
-- **Пример**: `ws://localhost:8080/ws?username=TestUser`
+- **Пример**: `ws://localhost:8080/websocket?username=TestUser`
 
 ### REST Эндпоинты
 - **GET /**: Отдает HTML страницу тестового клиента
@@ -269,7 +269,7 @@ go build -o websocket-server main.go
 curl http://localhost:8080/status
 
 # Тестирование WebSocket соединения (требует wscat)
-wscat -c ws://localhost:8080/ws?username=TestUser
+wscat -c ws://localhost:8080/websocket?username=TestUser
 ```
 
 ## Заключение

@@ -152,7 +152,7 @@ test_connection() {
     
     # Простой тест с wscat (если установлен)
     if command -v wscat &> /dev/null; then
-        timeout 5 wscat -c ws://localhost:9092/ws?username=test 2>/dev/null && log "✅ WebSocket соединение работает" || warning "⚠️  WebSocket соединение не работает"
+        timeout 5 wscat -c ws://localhost:9092/websocket?username=test 2>/dev/null && log "✅ WebSocket соединение работает" || warning "⚠️  WebSocket соединение не работает"
     else
         info "Установите wscat для тестирования WebSocket: npm install -g wscat"
     fi

@@ -67,7 +67,7 @@ fi
 
 log "🎉 SSL настройка завершена!"
 log "Сайт доступен по HTTPS: https://qabase.ru"
-log "WebSocket endpoint: wss://qabase.ru/ws"
+log "WebSocket endpoint: wss://qabase.ru/websocket"
 
 echo ""
 log "Полезные команды:"

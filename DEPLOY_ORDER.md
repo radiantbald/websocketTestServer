@@ -213,7 +213,7 @@ curl -f https://qabase.ru/status
 npm install -g wscat
 
 # Тест WebSocket соединения
-wscat -c wss://qabase.ru/ws?username=test
+wscat -c wss://qabase.ru/websocket?username=test
 
 # Отправьте тестовое сообщение
 {"type": "chat", "content": "Hello from server!"}
@@ -310,7 +310,7 @@ sudo tail -f /var/log/nginx/qabase.ru.access.log
 После выполнения всех шагов ваш WebSocket сервер будет доступен по адресам:
 
 - **🌐 Сайт**: https://qabase.ru
-- **🔌 WebSocket**: wss://qabase.ru/ws
+- **🔌 WebSocket**: wss://qabase.ru/websocket
 - **📊 Статус**: https://qabase.ru/status
 
 ### 📋 Полезные команды для управления:

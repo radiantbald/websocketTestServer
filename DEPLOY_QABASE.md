@@ -279,13 +279,13 @@ openssl x509 -in /etc/letsencrypt/live/qabase.ru/cert.pem -text -noout | grep "N
 
 ```bash
 # Проверяем проксирование
-curl -I https://qabase.ru/ws
+curl -I https://qabase.ru/websocket
 
 # Тест WebSocket соединения
-wscat -c wss://qabase.ru/ws?username=test
+wscat -c wss://qabase.ru/websocket?username=test
 
 # Проверяем nginx конфигурацию WebSocket
-sudo nginx -T | grep -A 10 -B 5 "location /ws"
+sudo nginx -T | grep -A 10 -B 5 "location /websocket"
 ```
 
 ## 📊 Производительность
@@ -364,7 +364,7 @@ sudo nginx -T | grep -A 20 "server_name qabase.ru"
 ### Контакты
 
 - **Домен**: https://qabase.ru
-- **WebSocket**: wss://qabase.ru/ws
+- **WebSocket**: wss://qabase.ru/websocket
 - **Статус**: https://qabase.ru/status
 - **Логи**: `sudo journalctl -u websocket-server -f`
 

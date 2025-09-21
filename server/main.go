@@ -378,7 +378,7 @@ func HandleStatus(w http.ResponseWriter, r *http.Request) {
 		"status":    "running",
 		"timestamp": time.Now(),
 		"endpoints": []string{
-			"/ws - WebSocket endpoint",
+			"/websocket - WebSocket endpoint",
 			"/status - Server status",
 			"/ - Test client page",
 		},
@@ -394,7 +394,7 @@ func main() {
 
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/simple", HandleSimple)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/websocket", func(w http.ResponseWriter, r *http.Request) {
 		HandleWebSocket(hub, w, r)
 	})
 	http.HandleFunc("/status", HandleStatus)
@@ -402,7 +402,7 @@ func main() {
 	port := ":9092"
 	log.Printf("WebSocket test server starting on port %s", port)
 	log.Printf("Open http://localhost%s in your browser to test", port)
-	log.Printf("WebSocket endpoint: ws://localhost%s/ws", port)
+	log.Printf("WebSocket endpoint: ws://localhost%s/websocket", port)
 
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal("Server failed to start:", err)

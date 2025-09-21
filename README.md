@@ -65,7 +65,7 @@ websocket-test-server/
 ### Server (`/server`)
 
 Go-based WebSocket server with:
-- WebSocket endpoint at `ws://localhost:9092/ws`
+- WebSocket endpoint at `ws://localhost:9092/websocket`
 - REST API for status monitoring
 - Support for multiple message types
 - Comprehensive logging
@@ -148,7 +148,7 @@ For advanced traffic analysis:
 
 ### WebSocket Endpoint
 
-- **URL**: `ws://localhost:9092/ws`
+- **URL**: `ws://localhost:9092/websocket`
 - **Parameters**: `?username=YourName`
 
 ### Message Types

@@ -130,7 +130,7 @@ log "6️⃣ Проверяем WebSocket endpoint..."
 
 # Тестируем WebSocket endpoint
 log "🔌 Тестируем WebSocket endpoint..."
-WS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/ws || echo "000")
+WS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/websocket || echo "000")
 log "📊 WebSocket статус: $WS_STATUS"
 
 if [ "$WS_STATUS" = "101" ] || [ "$WS_STATUS" = "200" ]; then
@@ -161,5 +161,5 @@ fi
 echo ""
 log "🎉 Полное исправление завершено!"
 log "🌐 Сайт должен быть доступен по адресу: https://$NGINX_SITE"
-log "🔌 WebSocket endpoint: https://$NGINX_SITE/ws"
+log "🔌 WebSocket endpoint: https://$NGINX_SITE/websocket"
 log "📊 Статус API: https://$NGINX_SITE/status"

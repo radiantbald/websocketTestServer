@@ -298,7 +298,7 @@ sudo journalctl -u websocket-server -n 20
 curl -f https://qabase.ru/status
 
 # Тест WebSocket
-wscat -c wss://qabase.ru/ws?username=test
+wscat -c wss://qabase.ru/websocket?username=test
 ```
 
 ---

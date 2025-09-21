@@ -93,7 +93,7 @@ fi
 
 log "🎉 Деплой завершен успешно!"
 log "Сервер доступен по адресу: https://qabase.ru"
-log "WebSocket endpoint: wss://qabase.ru/ws"
+log "WebSocket endpoint: wss://qabase.ru/websocket"
 log "Статус: https://qabase.ru/status"
 
 echo ""

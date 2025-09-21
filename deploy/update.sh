@@ -275,7 +275,7 @@ sudo systemctl is-active nginx && echo "    ✅ Nginx: активен" || echo "
 
 log "🎉 Обновление завершено успешно!"
 log "🌐 Сайт доступен: https://qabase.ru"
-log "🔌 WebSocket: wss://qabase.ru/ws"
+log "🔌 WebSocket: wss://qabase.ru/websocket"
 log "📊 Статус: https://qabase.ru/status"
 
 echo ""

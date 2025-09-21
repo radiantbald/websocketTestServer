@@ -20,7 +20,7 @@ go mod tidy
 # Start the server
 echo "🌟 Starting server on port 9092..."
 echo "📱 Open http://localhost:9092 in your browser"
-echo "🔌 WebSocket endpoint: ws://localhost:9092/ws"
+echo "🔌 WebSocket endpoint: ws://localhost:9092/websocket"
 echo ""
 echo "Press Ctrl+C to stop the server"
 

@@ -38,7 +38,7 @@ curl -I http://qabase.ru
 curl -I https://qabase.ru
 
 # Проверить WebSocket
-curl -I https://qabase.ru/ws
+curl -I https://qabase.ru/websocket
 ```
 
 ## 🔧 **Команды для диагностики**
@@ -135,7 +135,7 @@ curl https://qabase.ru/status
 После настройки:
 - ✅ `https://qabase.ru` - доступен
 - ✅ `https://www.qabase.ru` - доступен  
-- ✅ `https://qabase.ru/ws` - WebSocket endpoint
+- ✅ `https://qabase.ru/websocket` - WebSocket endpoint
 - ✅ `https://qabase.ru/status` - API статус
 - ✅ SSL сертификат действителен
 - ✅ Автоматическое обновление SSL

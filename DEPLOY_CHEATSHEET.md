@@ -82,7 +82,7 @@ sudo tail -f /var/log/nginx/qabase.ru.error.log
 
 ### Тест WebSocket
 ```bash
-wscat -c wss://qabase.ru/ws?username=test
+wscat -c wss://qabase.ru/websocket?username=test
 ```
 
 ## 🚨 Быстрое исправление
@@ -109,5 +109,5 @@ sudo -u www-data ./websocket-server
 
 ## 📊 Результат
 - **Сайт**: https://qabase.ru
-- **WebSocket**: wss://qabase.ru/ws
+- **WebSocket**: wss://qabase.ru/websocket
 - **Статус**: https://qabase.ru/status
