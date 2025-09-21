@@ -1067,11 +1067,8 @@
                     const currentUsername = document.getElementById('username').value || 'Anonymous';
                     const isOwnMessage = message.username === currentUsername;
                     
-                    // Для чат-сообщений показываем только полученные (не свои)
-                    if (message.type === 'chat' && isOwnMessage) {
-                        // Не показываем свои сообщения повторно, они уже показаны при отправке
-                        return;
-                    }
+                    // Показываем все сообщения от сервера, включая собственные
+                    // Это обеспечивает синхронизацию между всеми клиентами
                     
                     addMessage(message.type, message.content, message.username, new Date(message.timestamp), isOwnMessage);
                 } catch (e) {
@@ -1169,10 +1166,7 @@
                 const messageStr = JSON.stringify(message);
                 console.log('Отправляем WebSocket сообщение:', messageStr);
                 
-                // Сразу показываем отправленное сообщение
-                const currentUsername = document.getElementById('username').value || 'Anonymous';
-                addMessage('chat', content, currentUsername, new Date(), true);
-                
+                // Отправляем сообщение - оно будет показано когда придет от сервера
                 ws.send(messageStr);
                 input.value = '';
             }

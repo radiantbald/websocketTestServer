@@ -144,7 +144,16 @@
                 console.log('📨 Получено сообщение:', event.data);
                 try {
                     const message = JSON.parse(event.data);
-                    addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
+                    const currentUsername = document.getElementById('username').value || 'Anonymous';
+                    const isOwnMessage = message.username === currentUsername;
+                    
+                    if (message.type === 'chat') {
+                        const className = isOwnMessage ? 'sent' : 'received';
+                        const prefix = isOwnMessage ? 'Вы' : (message.username || 'Server');
+                        addMessage('received', `${prefix}: ${message.content}`, className);
+                    } else {
+                        addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
+                    }
                 } catch (e) {
                     addMessage('received', `Raw: ${event.data}`, 'received');
                 }
@@ -183,7 +192,6 @@
                 console.log('📤 Отправляем сообщение:', messageStr);
                 
                 ws.send(messageStr);
-                addMessage('sent', `Вы: ${content}`, 'sent');
                 input.value = '';
             }
         }
