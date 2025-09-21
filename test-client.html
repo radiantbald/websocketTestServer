@@ -1067,6 +1067,17 @@
                     const currentUsername = document.getElementById('username').value || 'Anonymous';
                     const isOwnMessage = message.username === currentUsername;
                     
+                    // Специальная обработка ошибок
+                    if (message.type === 'error') {
+                        addMessage('error', message.content, message.username, new Date(message.timestamp), isOwnMessage);
+                        
+                        // Если это ошибка дублирования имени, показываем алерт
+                        if (message.content.includes('already taken')) {
+                            alert(`❌ Ошибка: ${message.content}\n\nПожалуйста, выберите другое имя пользователя.`);
+                        }
+                        return;
+                    }
+                    
                     // Показываем все сообщения от сервера, включая собственные
                     // Это обеспечивает синхронизацию между всеми клиентами
                     

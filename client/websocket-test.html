@@ -147,6 +147,17 @@
                     const currentUsername = document.getElementById('username').value || 'Anonymous';
                     const isOwnMessage = message.username === currentUsername;
                     
+                    // Специальная обработка ошибок
+                    if (message.type === 'error') {
+                        addMessage('received', `❌ Ошибка: ${message.content}`, 'system');
+                        
+                        // Если это ошибка дублирования имени, показываем алерт
+                        if (message.content.includes('already taken')) {
+                            alert(`❌ Ошибка: ${message.content}\n\nПожалуйста, выберите другое имя пользователя.`);
+                        }
+                        return;
+                    }
+                    
                     if (message.type === 'chat') {
                         const className = isOwnMessage ? 'sent' : 'received';
                         const prefix = isOwnMessage ? 'Вы' : (message.username || 'Server');

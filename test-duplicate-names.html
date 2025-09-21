@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест чата - Множественные клиенты</title>
+    <title>Тест дублирования имен</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,28 +11,37 @@
             background: #f5f5f5;
         }
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
         }
         .client {
             background: white;
-            margin: 10px;
+            margin: 10px 0;
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: inline-block;
-            width: 300px;
-            vertical-align: top;
-        }
-        .client h3 {
-            margin-top: 0;
-            color: #333;
+            border: 1px solid #ddd;
         }
         .status {
             padding: 5px 10px;
             border-radius: 4px;
             font-weight: bold;
             margin: 5px 0;
+            display: inline-block;
         }
         .connected { background: #d4edda; color: #155724; }
         .disconnected { background: #f8d7da; color: #721c24; }
@@ -56,22 +65,23 @@
         }
         
         .messages {
-            height: 200px;
+            height: 150px;
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 10px;
             margin: 10px 0;
             background: #f8f9fa;
+            font-size: 0.9em;
         }
         .message {
-            margin: 3px 0;
-            padding: 3px;
+            margin: 2px 0;
+            padding: 2px;
             border-radius: 3px;
-            font-size: 0.9em;
         }
         .sent { background: #d1ecf1; text-align: right; }
         .received { background: #d4edda; }
         .system { background: #fff3cd; }
+        .error { background: #f8d7da; color: #721c24; }
         
         .controls {
             text-align: center;
@@ -82,52 +92,65 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 Тест чата - Множественные клиенты</h1>
+        <h1>🧪 Тест дублирования имен пользователей</h1>
+        
+        <div class="instructions">
+            <h3>📋 Инструкции по тестированию:</h3>
+            <ol>
+                <li>Нажмите "Подключить первого клиента" - должен подключиться успешно</li>
+                <li>Нажмите "Подключить второго клиента с тем же именем" - должно появиться сообщение об ошибке</li>
+                <li>Измените имя второго клиента и попробуйте снова - должно подключиться успешно</li>
+                <li>Отключите первого клиента и попробуйте подключиться с его именем - должно работать</li>
+            </ol>
+        </div>
         
         <div class="controls">
-            <button onclick="createClient()">➕ Добавить клиента</button>
-            <button onclick="connectAll()">🔗 Подключить всех</button>
+            <button onclick="connectFirstClient()">🔗 Подключить первого клиента</button>
+            <button onclick="connectSecondClient()">🔗 Подключить второго клиента с тем же именем</button>
+            <button onclick="connectSecondClientWithDifferentName()">🔗 Подключить второго клиента с другим именем</button>
+            <button onclick="disconnectFirstClient()">❌ Отключить первого клиента</button>
             <button onclick="disconnectAll()">❌ Отключить всех</button>
             <button onclick="clearAllMessages()">🗑️ Очистить все</button>
         </div>
         
-        <div id="clients"></div>
+        <div class="test-section">
+            <h3>👤 Клиент 1 (Имя: "ТестПользователь")</h3>
+            <div class="client">
+                <div id="client1_status" class="status disconnected">Отключено</div>
+                <input type="text" id="client1_message" placeholder="Введите сообщение..." disabled>
+                <button id="client1_send" onclick="sendMessage('client1')" disabled>Отправить</button>
+                <div id="client1_messages" class="messages"></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>👤 Клиент 2 (Имя: "ТестПользователь" → "ДругойПользователь")</h3>
+            <div class="client">
+                <div id="client2_status" class="status disconnected">Отключено</div>
+                <input type="text" id="client2_message" placeholder="Введите сообщение..." disabled>
+                <button id="client2_send" onclick="sendMessage('client2')" disabled>Отправить</button>
+                <div id="client2_messages" class="messages"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let clients = [];
-        let clientCounter = 0;
-        
-        function createClient() {
-            clientCounter++;
-            const clientId = `client_${clientCounter}`;
-            const username = `Пользователь${clientCounter}`;
-            
-            const clientDiv = document.createElement('div');
-            clientDiv.className = 'client';
-            clientDiv.id = clientId;
-            clientDiv.innerHTML = `
-                <h3>👤 ${username}</h3>
-                <div id="${clientId}_status" class="status disconnected">Отключено</div>
-                <input type="text" id="${clientId}_message" placeholder="Введите сообщение..." disabled>
-                <button id="${clientId}_send" onclick="sendMessage('${clientId}')" disabled>Отправить</button>
-                <button id="${clientId}_connect" onclick="toggleConnection('${clientId}')">Подключиться</button>
-                <div id="${clientId}_messages" class="messages"></div>
-            `;
-            
-            document.getElementById('clients').appendChild(clientDiv);
-            
-            clients.push({
-                id: clientId,
-                username: username,
-                ws: null,
-                connected: false
-            });
-        }
+        let clients = {
+            client1: { ws: null, connected: false, username: 'ТестПользователь' },
+            client2: { ws: null, connected: false, username: 'ТестПользователь' }
+        };
         
         function updateStatus(clientId, status, className) {
             const statusEl = document.getElementById(`${clientId}_status`);
@@ -136,16 +159,13 @@
             
             const messageInput = document.getElementById(`${clientId}_message`);
             const sendBtn = document.getElementById(`${clientId}_send`);
-            const connectBtn = document.getElementById(`${clientId}_connect`);
             
             if (className === 'connected') {
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
-                connectBtn.textContent = 'Отключиться';
             } else {
                 messageInput.disabled = true;
                 sendBtn.disabled = true;
-                connectBtn.textContent = 'Подключиться';
             }
         }
         
@@ -162,31 +182,22 @@
             messagesEl.scrollTop = messagesEl.scrollHeight;
         }
         
-        function toggleConnection(clientId) {
-            const client = clients.find(c => c.id === clientId);
+        function connectClient(clientId, username) {
+            const client = clients[clientId];
             if (!client) return;
             
-            if (client.connected) {
-                disconnect(clientId);
-            } else {
-                connect(clientId);
-            }
-        }
-        
-        function connect(clientId) {
-            const client = clients.find(c => c.id === clientId);
-            if (!client) return;
-            
-            const wsUrl = `ws://localhost:9092/api/websocket?username=${encodeURIComponent(client.username)}`;
+            const wsUrl = `ws://localhost:9092/api/websocket?username=${encodeURIComponent(username)}`;
             
             updateStatus(clientId, 'Подключение...', 'connecting');
+            addMessage(clientId, 'system', `🔄 Попытка подключения с именем: ${username}`, '', 'system');
             
             client.ws = new WebSocket(wsUrl);
+            client.username = username;
             
             client.ws.onopen = function(event) {
                 client.connected = true;
                 updateStatus(clientId, 'Подключено', 'connected');
-                addMessage(clientId, 'system', '✅ Подключено к серверу', '', 'system');
+                addMessage(clientId, 'system', `✅ Успешно подключен как: ${username}`, '', 'system');
             };
             
             client.ws.onmessage = function(event) {
@@ -196,7 +207,7 @@
                     
                     // Специальная обработка ошибок
                     if (message.type === 'error') {
-                        addMessage(clientId, 'error', message.content, message.username || 'Server', 'system');
+                        addMessage(clientId, 'error', message.content, message.username || 'Server', 'error');
                         
                         // Если это ошибка дублирования имени, показываем алерт
                         if (message.content.includes('already taken')) {
@@ -212,7 +223,7 @@
                         addMessage(clientId, message.type, message.content, message.username || 'Server', 'system');
                     }
                 } catch (e) {
-                    addMessage(clientId, 'error', `Ошибка: ${event.data}`, '', 'system');
+                    addMessage(clientId, 'error', `Ошибка: ${event.data}`, '', 'error');
                 }
             };
             
@@ -223,19 +234,19 @@
             };
             
             client.ws.onerror = function(error) {
-                addMessage(clientId, 'error', '💥 Ошибка WebSocket', '', 'system');
+                addMessage(clientId, 'error', '💥 Ошибка WebSocket', '', 'error');
             };
         }
         
-        function disconnect(clientId) {
-            const client = clients.find(c => c.id === clientId);
+        function disconnectClient(clientId) {
+            const client = clients[clientId];
             if (client && client.ws) {
                 client.ws.close();
             }
         }
         
         function sendMessage(clientId) {
-            const client = clients.find(c => c.id === clientId);
+            const client = clients[clientId];
             if (!client || !client.connected) return;
             
             const input = document.getElementById(`${clientId}_message`);
@@ -252,25 +263,31 @@
             }
         }
         
-        function connectAll() {
-            clients.forEach(client => {
-                if (!client.connected) {
-                    connect(client.id);
-                }
-            });
+        function connectFirstClient() {
+            connectClient('client1', 'ТестПользователь');
+        }
+        
+        function connectSecondClient() {
+            connectClient('client2', 'ТестПользователь'); // То же имя - должно быть отклонено
+        }
+        
+        function connectSecondClientWithDifferentName() {
+            connectClient('client2', 'ДругойПользователь'); // Другое имя - должно работать
+        }
+        
+        function disconnectFirstClient() {
+            disconnectClient('client1');
         }
         
         function disconnectAll() {
-            clients.forEach(client => {
-                if (client.connected) {
-                    disconnect(client.id);
-                }
+            Object.keys(clients).forEach(clientId => {
+                disconnectClient(clientId);
             });
         }
         
         function clearAllMessages() {
-            clients.forEach(client => {
-                document.getElementById(`${client.id}_messages`).innerHTML = '';
+            Object.keys(clients).forEach(clientId => {
+                document.getElementById(`${clientId}_messages`).innerHTML = '';
             });
         }
         
@@ -282,12 +299,7 @@
             }
         });
         
-        // Создаем 3 клиента по умолчанию
-        for (let i = 0; i < 3; i++) {
-            createClient();
-        }
-        
-        console.log('🧪 Тест чата загружен');
+        console.log('🧪 Тест дублирования имен загружен');
     </script>
 </body>
 </html>
