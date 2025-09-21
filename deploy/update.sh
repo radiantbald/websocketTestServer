@@ -273,6 +273,30 @@ echo "  Статус сервисов:"
 sudo systemctl is-active $SERVICE_NAME && echo "    ✅ WebSocket сервер: активен" || echo "    ❌ WebSocket сервер: неактивен"
 sudo systemctl is-active nginx && echo "    ✅ Nginx: активен" || echo "    ❌ Nginx: неактивен"
 
+# Исправляем nginx конфигурацию для WebSocket
+log "🔧 Исправление nginx конфигурации для WebSocket..."
+NGINX_CONFIG="/etc/nginx/sites-available/qabase.ru"
+if [ -f "$NGINX_CONFIG" ]; then
+    # Создаем резервную копию
+    BACKUP_DIR="/etc/nginx/backup-$(date +%Y%m%d-%H%M%S)"
+    sudo mkdir -p "$BACKUP_DIR"
+    sudo cp "$NGINX_CONFIG" "$BACKUP_DIR/nginx.conf.backup"
+    
+    # Копируем исправленную конфигурацию
+    sudo cp "$PROJECT_DIR/deploy/nginx-qabase.conf" "$NGINX_CONFIG"
+    
+    # Проверяем синтаксис и перезагружаем
+    if sudo nginx -t; then
+        sudo systemctl reload nginx
+        log "✅ Nginx конфигурация исправлена и перезагружена"
+    else
+        log "❌ Ошибка в nginx конфигурации, восстанавливаем резервную копию"
+        sudo cp "$BACKUP_DIR/nginx.conf.backup" "$NGINX_CONFIG"
+    fi
+else
+    warning "⚠️  Nginx конфигурация не найдена: $NGINX_CONFIG"
+fi
+
 log "🎉 Обновление завершено успешно!"
 log "🌐 Сайт доступен: https://qabase.ru"
 log "🔌 WebSocket: wss://qabase.ru/websocket"

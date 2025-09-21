@@ -43,9 +43,12 @@ sudo mkdir -p "$BACKUP_DIR"
 sudo cp "$NGINX_CONFIG" "$BACKUP_DIR/nginx.conf.backup"
 log "✅ Резервная копия создана: $BACKUP_DIR"
 
+# Получаем путь к директории скрипта
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Копируем исправленную конфигурацию
 log "📝 Копирование исправленной конфигурации..."
-sudo cp "nginx-qabase.conf" "$NGINX_CONFIG"
+sudo cp "$SCRIPT_DIR/nginx-qabase.conf" "$NGINX_CONFIG"
 log "✅ Конфигурация обновлена"
 
 # Проверяем синтаксис nginx
