@@ -89,6 +89,10 @@ update-go: ## Обновить Go на сервере
 	@echo "$(GREEN)Обновляем Go на сервере...$(NC)"
 	./deploy/update-go.sh
 
+force-update-go: ## Принудительно обновить Go (удалить все версии)
+	@echo "$(GREEN)Принудительно обновляем Go...$(NC)"
+	./deploy/force-update-go.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 
