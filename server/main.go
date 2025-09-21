@@ -378,7 +378,8 @@ func HandleStatus(w http.ResponseWriter, r *http.Request) {
 		"status":    "running",
 		"timestamp": time.Now(),
 		"endpoints": []string{
-			"/websocket - WebSocket endpoint",
+			"/websocket - WebSocket test page (HTTP) or WebSocket endpoint (WS)",
+			"/websocket-api - WebSocket API endpoint",
 			"/status - Server status",
 			"/ - Test client page",
 		},
@@ -395,6 +396,15 @@ func main() {
 	http.HandleFunc("/", HandleRoot)
 	http.HandleFunc("/simple", HandleSimple)
 	http.HandleFunc("/websocket", func(w http.ResponseWriter, r *http.Request) {
+		// Если это WebSocket запрос, обрабатываем как WebSocket
+		if r.Header.Get("Upgrade") == "websocket" {
+			HandleWebSocket(hub, w, r)
+		} else {
+			// Если это обычный HTTP запрос, отдаем тестовую страницу
+			http.ServeFile(w, r, "../client/test-client.html")
+		}
+	})
+	http.HandleFunc("/websocket-api", func(w http.ResponseWriter, r *http.Request) {
 		HandleWebSocket(hub, w, r)
 	})
 	http.HandleFunc("/status", HandleStatus)
