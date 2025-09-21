@@ -159,7 +159,7 @@ func (h *Hub) Run() {
 				log.Printf("Rejected client %s: username '%s' is already taken", client.ID, client.Username)
 				errorMessage := Message{
 					Type:      "error",
-					Content:   fmt.Sprintf("Username '%s' is already taken. Please choose a different name.", client.Username),
+					Content:   fmt.Sprintf("❌ Пользователь с именем '%s' уже подключен к чату. Пожалуйста, выберите другое имя.", client.Username),
 					Timestamp: time.Now(),
 				}
 				client.Send <- errorMessage
