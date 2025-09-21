@@ -1,189 +1,120 @@
 #!/bin/bash
 
-# Скрипт для диагностики проблем с запуском Nginx
-# Использование: ./diagnose-nginx.sh
+# Диагностика nginx конфигурации
+# Показывает текущее состояние и проблемы
 
 set -e
 
-NGINX_SITE="qabase.ru"
-
-# Цвета для вывода
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+    echo -e "\033[0;32m[$(date +'%H:%M:%S')] $1\033[0m"
 }
 
 error() {
-    echo -e "${RED}[ERROR] $1${NC}"
-    exit 1
+    echo -e "\033[0;31m[$(date +'%H:%M:%S')] ERROR: $1\033[0m"
 }
 
 warning() {
-    echo -e "${YELLOW}[WARNING] $1${NC}"
+    echo -e "\033[0;33m[$(date +'%H:%M:%S')] WARNING: $1\033[0m"
 }
 
 info() {
-    echo -e "${BLUE}[INFO] $1${NC}"
+    echo -e "\033[0;34m[$(date +'%H:%M:%S')] INFO: $1\033[0m"
 }
 
-log "🔍 Диагностика проблем с запуском Nginx..."
+NGINX_SITE="qabase.ru"
+NGINX_CONFIG="/etc/nginx/sites-available/$NGINX_SITE"
+NGINX_ENABLED="/etc/nginx/sites-enabled/$NGINX_SITE"
+
+log "🔍 Диагностика nginx конфигурации..."
 
 echo ""
-log "1️⃣ Проверка статуса Nginx..."
-
-# Проверяем статус Nginx
-log "📊 Статус сервиса Nginx:"
-sudo systemctl status nginx --no-pager || warning "Не удалось получить статус"
-
-echo ""
-log "2️⃣ Проверка логов Nginx..."
-
-# Показываем последние логи
-log "📋 Последние логи Nginx:"
-sudo journalctl -u nginx -n 20 --no-pager || warning "Нет логов Nginx"
-
-echo ""
-log "3️⃣ Проверка конфигурации..."
-
-# Проверяем синтаксис
-log "🔍 Проверка синтаксиса конфигурации:"
-sudo nginx -t || warning "Ошибка в синтаксисе"
-
-echo ""
-log "4️⃣ Проверка портов..."
-
-# Проверяем, заняты ли порты 80 и 443
-log "🔍 Проверяем порты 80 и 443:"
-if sudo netstat -tlnp | grep -q ":80 "; then
-    log "⚠️  Порт 80 занят:"
-    sudo netstat -tlnp | grep ":80 "
+info "📋 Проверка файлов конфигурации:"
+if [ -f "$NGINX_CONFIG" ]; then
+    echo "  ✅ $NGINX_CONFIG - существует"
 else
-    log "✅ Порт 80 свободен"
+    echo "  ❌ $NGINX_CONFIG - не найден"
 fi
 
-if sudo netstat -tlnp | grep -q ":443 "; then
-    log "⚠️  Порт 443 занят:"
-    sudo netstat -tlnp | grep ":443 "
+if [ -L "$NGINX_ENABLED" ]; then
+    echo "  ✅ $NGINX_ENABLED - символическая ссылка существует"
+    echo "  📎 Ссылается на: $(readlink $NGINX_ENABLED)"
 else
-    log "✅ Порт 443 свободен"
+    echo "  ❌ $NGINX_ENABLED - символическая ссылка не найдена"
 fi
 
 echo ""
-log "5️⃣ Проверка файлов конфигурации..."
-
-# Проверяем файлы конфигурации
-log "📄 Проверяем файлы конфигурации:"
-if [ -f "/etc/nginx/sites-available/$NGINX_SITE" ]; then
-    log "✅ Конфигурация найдена: /etc/nginx/sites-available/$NGINX_SITE"
+info "🔍 Проверка синтаксиса nginx:"
+if sudo nginx -t 2>&1; then
+    echo "  ✅ Синтаксис nginx корректен"
 else
-    error "❌ Конфигурация не найдена: /etc/nginx/sites-available/$NGINX_SITE"
-fi
-
-if [ -L "/etc/nginx/sites-enabled/$NGINX_SITE" ]; then
-    log "✅ Конфигурация активирована: /etc/nginx/sites-enabled/$NGINX_SITE"
-else
-    warning "⚠️  Конфигурация не активирована"
+    echo "  ❌ Ошибки в синтаксисе nginx"
 fi
 
 echo ""
-log "6️⃣ Проверка SSL сертификатов..."
+info "📊 Статус nginx сервиса:"
+if sudo systemctl is-active --quiet nginx; then
+    echo "  ✅ Nginx запущен"
+else
+    echo "  ❌ Nginx не запущен"
+fi
 
-# Проверяем SSL сертификаты
-if [ -f "/etc/letsencrypt/live/$NGINX_SITE/fullchain.pem" ]; then
-    log "✅ SSL сертификат найден"
+echo ""
+info "🔍 Поиск дублирующихся location блоков:"
+if [ -f "$NGINX_CONFIG" ]; then
+    WEBSOCKET_COUNT=$(grep -c "location /websocket" "$NGINX_CONFIG" || echo "0")
+    echo "  📊 Найдено location /websocket блоков: $WEBSOCKET_COUNT"
     
-    # Проверяем права доступа
-    CERT_PERMS=$(ls -la /etc/letsencrypt/live/$NGINX_SITE/fullchain.pem | awk '{print $1}')
-    log "📋 Права на сертификат: $CERT_PERMS"
-    
-    # Проверяем, может ли Nginx читать сертификат
-    if sudo -u www-data test -r /etc/letsencrypt/live/$NGINX_SITE/fullchain.pem; then
-        log "✅ Nginx может читать SSL сертификат"
+    if [ "$WEBSOCKET_COUNT" -gt 1 ]; then
+        error "  ❌ Обнаружены дублирующиеся location /websocket блоки!"
+        echo "  📍 Строки с location /websocket:"
+        grep -n "location /websocket" "$NGINX_CONFIG" | sed 's/^/    /'
+    elif [ "$WEBSOCKET_COUNT" -eq 1 ]; then
+        echo "  ✅ Найден один location /websocket блок"
     else
-        warning "⚠️  Nginx не может читать SSL сертификат"
+        warning "  ⚠️  Location /websocket блоки не найдены"
     fi
 else
-    warning "⚠️  SSL сертификат не найден"
+    echo "  ❌ Файл конфигурации не найден"
 fi
 
 echo ""
-log "7️⃣ Проверка процессов..."
+info "🔍 Поиск других location блоков:"
+if [ -f "$NGINX_CONFIG" ]; then
+    echo "  📊 Все location блоки:"
+    grep -n "location " "$NGINX_CONFIG" | sed 's/^/    /'
+fi
 
-# Проверяем, есть ли процессы Nginx
-if pgrep nginx > /dev/null; then
-    log "⚠️  Найдены процессы Nginx:"
-    ps aux | grep nginx | grep -v grep
+echo ""
+info "🌐 Тестирование endpoints:"
+# Тест WebSocket endpoint
+WS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/websocket 2>/dev/null || echo "000")
+echo "  📊 WebSocket endpoint (/websocket): $WS_STATUS"
+
+# Тест статус endpoint
+STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/status 2>/dev/null || echo "000")
+echo "  📊 Статус endpoint (/status): $STATUS_CODE"
+
+# Тест тестовой страницы
+TEST_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/websocket-test 2>/dev/null || echo "000")
+echo "  📊 Тестовая страница (/websocket-test): $TEST_CODE"
+
+# Тест главной страницы
+MAIN_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$NGINX_SITE/ 2>/dev/null || echo "000")
+echo "  📊 Главная страница (/): $MAIN_CODE"
+
+echo ""
+info "📋 Рекомендации:"
+if [ "$WEBSOCKET_COUNT" -gt 1 ]; then
+    echo "  🔧 Запустите: ./deploy/force-recreate-nginx.sh"
+    echo "  🔧 Или: ./deploy/simple-nginx-fix.sh"
+elif [ "$WEBSOCKET_COUNT" -eq 0 ]; then
+    echo "  🔧 Запустите: ./deploy/force-recreate-nginx.sh"
+elif [ "$WS_STATUS" = "000" ]; then
+    echo "  🔧 Проверьте, что WebSocket сервер запущен на порту 9092"
+    echo "  🔧 Запустите: sudo systemctl status websocket-server"
 else
-    log "✅ Процессы Nginx не найдены"
+    echo "  ✅ Конфигурация выглядит корректно"
 fi
-
-echo ""
-log "8️⃣ Проверка прав доступа..."
-
-# Проверяем права на директории
-log "🔐 Проверяем права доступа:"
-ls -la /etc/nginx/sites-available/ | grep $NGINX_SITE
-ls -la /etc/nginx/sites-enabled/ | grep $NGINX_SITE
-
-echo ""
-log "9️⃣ Попытка запуска с диагностикой..."
-
-# Пытаемся запустить Nginx с подробным выводом
-log "🧪 Пытаемся запустить Nginx..."
-sudo systemctl start nginx 2>&1 || warning "Не удалось запустить Nginx"
-
-# Ждем немного
-sleep 2
-
-# Проверяем статус
-if sudo systemctl is-active --quiet nginx; then
-    log "✅ Nginx запущен успешно"
-else
-    warning "⚠️  Nginx не запустился"
-    
-    # Показываем дополнительные логи
-    log "📋 Дополнительные логи:"
-    sudo journalctl -u nginx -n 10 --no-pager
-fi
-
-echo ""
-log "🔟 Рекомендации по исправлению..."
-
-# Даем рекомендации
-if sudo netstat -tlnp | grep -q ":80 "; then
-    log "🔧 Рекомендация: Освободите порт 80"
-    echo "  sudo fuser -k 80/tcp"
-fi
-
-if sudo netstat -tlnp | grep -q ":443 "; then
-    log "🔧 Рекомендация: Освободите порт 443"
-    echo "  sudo fuser -k 443/tcp"
-fi
-
-if [ ! -L "/etc/nginx/sites-enabled/$NGINX_SITE" ]; then
-    log "🔧 Рекомендация: Активируйте конфигурацию"
-    echo "  sudo ln -sf /etc/nginx/sites-available/$NGINX_SITE /etc/nginx/sites-enabled/"
-fi
-
-if [ ! -f "/etc/letsencrypt/live/$NGINX_SITE/fullchain.pem" ]; then
-    log "🔧 Рекомендация: Получите SSL сертификат"
-    echo "  sudo certbot --nginx -d $NGINX_SITE -d www.$NGINX_SITE"
-fi
-
-if pgrep nginx > /dev/null; then
-    log "🔧 Рекомендация: Завершите все процессы Nginx"
-    echo "  sudo pkill nginx"
-    echo "  sudo systemctl stop nginx"
-fi
-
-log "🔧 Рекомендация: Попробуйте перезапустить Nginx"
-echo "  sudo systemctl restart nginx"
 
 echo ""
 log "🎯 Диагностика завершена!"
-log "📋 Следуйте рекомендациям выше для исправления проблем"
