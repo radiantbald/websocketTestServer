@@ -41,6 +41,21 @@ sudo chown www-data:www-data websocket-server
 sudo systemctl restart websocket-server
 ```
 
+### Настройка сервиса
+```bash
+# Создать/обновить systemd сервис
+./deploy/setup-service.sh
+
+# Показать статус сервиса
+./deploy/setup-service.sh --status
+
+# Перезапустить сервис
+./deploy/setup-service.sh --restart
+
+# Удалить сервис
+./deploy/setup-service.sh --remove
+```
+
 ### Полная переустановка
 ```bash
 sudo systemctl stop websocket-server

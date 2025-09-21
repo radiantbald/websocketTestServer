@@ -93,6 +93,10 @@ force-update-go: ## Принудительно обновить Go (удалит
 	@echo "$(GREEN)Принудительно обновляем Go...$(NC)"
 	./deploy/force-update-go.sh
 
+setup-service: ## Настроить systemd сервис
+	@echo "$(GREEN)Настраиваем systemd сервис...$(NC)"
+	./deploy/setup-service.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 

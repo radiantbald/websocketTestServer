@@ -114,7 +114,13 @@ fi
 
 # Останавливаем сервисы
 log "⏹️  Останавливаем сервисы..."
-sudo systemctl stop $SERVICE_NAME || warning "Не удалось остановить $SERVICE_NAME"
+
+# Проверяем, существует ли сервис
+if sudo systemctl list-unit-files | grep -q "$SERVICE_NAME.service"; then
+    sudo systemctl stop $SERVICE_NAME || warning "Не удалось остановить $SERVICE_NAME"
+else
+    warning "⚠️  Сервис $SERVICE_NAME не найден, пропускаем остановку"
+fi
 
 # Сохраняем локальные изменения
 log "💾 Сохраняем локальные изменения..."
@@ -207,7 +213,23 @@ fi
 
 # Запускаем сервисы
 log "▶️  Запускаем сервисы..."
-sudo systemctl start $SERVICE_NAME
+
+# Проверяем и запускаем WebSocket сервер
+if sudo systemctl list-unit-files | grep -q "$SERVICE_NAME.service"; then
+    sudo systemctl start $SERVICE_NAME
+    log "✅ WebSocket сервер запущен"
+else
+    warning "⚠️  Сервис $SERVICE_NAME не найден, создаем его..."
+    
+    # Создаем сервис
+    sudo cp $PROJECT_DIR/deploy/websocket-server.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable $SERVICE_NAME
+    sudo systemctl start $SERVICE_NAME
+    log "✅ WebSocket сервер создан и запущен"
+fi
+
+# Перезагружаем nginx
 sudo systemctl reload nginx
 
 # Проверяем статус
