@@ -379,7 +379,7 @@ func HandleStatus(w http.ResponseWriter, r *http.Request) {
 		"timestamp": time.Now(),
 		"endpoints": []string{
 			"/websocket - WebSocket test page (HTTP) or WebSocket endpoint (WS)",
-			"/websocket-api - WebSocket API endpoint",
+			"/api/websocket - WebSocket API endpoint",
 			"/status - Server status",
 			"/ - Test client page",
 		},
@@ -404,7 +404,7 @@ func main() {
 			http.ServeFile(w, r, "../client/test-client.html")
 		}
 	})
-	http.HandleFunc("/websocket-api", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		HandleWebSocket(hub, w, r)
 	})
 	http.HandleFunc("/status", HandleStatus)

@@ -126,7 +126,7 @@
         
         function connect() {
             const username = document.getElementById('username').value || 'Anonymous';
-            const wsUrl = `wss://qabase.ru/websocket-api?username=${encodeURIComponent(username)}`;
+            const wsUrl = `wss://qabase.ru/api/websocket?username=${encodeURIComponent(username)}`;
             
             console.log('🔌 Подключаемся к:', wsUrl);
             updateStatus('Подключение...', 'connecting');

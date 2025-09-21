@@ -901,7 +901,7 @@
             <div class="header-right">
                 <div class="connection-info-header">
                     <div class="info-item">
-                        <strong>WebSocket URL:</strong> <span id="wsUrl">wss://qabase.ru/websocket-api</span>
+                        <strong>WebSocket URL:</strong> <span id="wsUrl">wss://qabase.ru/api/websocket</span>
                     </div>
                     <div class="info-item">
                         <strong>Status:</strong> <a href="/status" target="_blank">/status</a>
@@ -1029,7 +1029,7 @@
         
         function connect() {
             const username = document.getElementById('username').value || 'Anonymous';
-            const wsUrl = `wss://qabase.ru/websocket-api?username=${encodeURIComponent(username)}`;
+            const wsUrl = `wss://qabase.ru/api/websocket?username=${encodeURIComponent(username)}`;
             
             updateStatus('Подключение...', 'connecting');
             
@@ -1278,7 +1278,7 @@
             addMessage('system', '🔗 Открытие множественных соединений...');
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
-                    const testWs = new WebSocket(`wss://qabase.ru/websocket-api?username=ТестПользователь${i}`);
+                    const testWs = new WebSocket(`wss://qabase.ru/api/websocket?username=ТестПользователь${i}`);
                     testWs.onopen = () => addMessage('system', `✅ Тестовое соединение ${i} открыто`);
                     testWs.onclose = () => addMessage('system', `❌ Тестовое соединение ${i} закрыто`);
                 }, i * 1000);

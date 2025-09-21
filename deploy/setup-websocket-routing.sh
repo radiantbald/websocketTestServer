@@ -85,9 +85,9 @@ log "🧪 Тестирование endpoints..."
 WEBSOCKET_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://qabase.ru/websocket 2>/dev/null || echo "000")
 echo "  📊 /websocket (HTML страница) - HTTP $WEBSOCKET_STATUS"
 
-# Тест /websocket-api (должен отклонять HTTP запросы)
-WEBSOCKET_API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://qabase.ru/websocket-api 2>/dev/null || echo "000")
-echo "  📊 /websocket-api (WebSocket API) - HTTP $WEBSOCKET_API_STATUS"
+# Тест /api/websocket (должен отклонять HTTP запросы)
+WEBSOCKET_API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://qabase.ru/api/websocket 2>/dev/null || echo "000")
+echo "  📊 /api/websocket (WebSocket API) - HTTP $WEBSOCKET_API_STATUS"
 
 # Тест /status
 STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://qabase.ru/status 2>/dev/null || echo "000")
@@ -101,9 +101,9 @@ else
 fi
 
 if [ "$WEBSOCKET_API_STATUS" = "400" ]; then
-    log "✅ /websocket-api правильно отклоняет HTTP запросы"
+    log "✅ /api/websocket правильно отклоняет HTTP запросы"
 else
-    warning "⚠️  /websocket-api вернул код: $WEBSOCKET_API_STATUS"
+    warning "⚠️  /api/websocket вернул код: $WEBSOCKET_API_STATUS"
 fi
 
 if [ "$STATUS_CODE" = "200" ]; then
@@ -115,7 +115,7 @@ fi
 echo ""
 log "🎉 Настройка маршрутизации WebSocket завершена!"
 log "🌐 Тестовая страница: https://qabase.ru/websocket"
-log "🔌 WebSocket API: wss://qabase.ru/websocket-api"
+log "🔌 WebSocket API: wss://qabase.ru/api/websocket"
 log "📊 Статус: https://qabase.ru/status"
 
 echo ""
@@ -123,7 +123,7 @@ log "📋 Как использовать:"
 echo "  1. Откройте https://qabase.ru/websocket в браузере"
 echo "  2. Введите имя пользователя"
 echo "  3. Нажмите 'Подключиться'"
-echo "  4. JavaScript подключится к wss://qabase.ru/websocket-api"
+echo "  4. JavaScript подключится к wss://qabase.ru/api/websocket"
 echo "  5. Отправляйте сообщения в чат"
 
 echo ""
