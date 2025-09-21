@@ -97,6 +97,10 @@ setup-service: ## Настроить systemd сервис
 	@echo "$(GREEN)Настраиваем systemd сервис...$(NC)"
 	./deploy/setup-service.sh
 
+diagnose-service: ## Диагностика проблем с сервисом
+	@echo "$(GREEN)Диагностируем проблемы с сервисом...$(NC)"
+	./deploy/diagnose-service.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 
