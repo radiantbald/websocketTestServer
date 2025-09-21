@@ -126,7 +126,7 @@
         
         function connect() {
             const username = document.getElementById('username').value || 'Anonymous';
-            const wsUrl = `ws://localhost:9090/ws?username=${encodeURIComponent(username)}`;
+            const wsUrl = `wss://qabase.ru/ws?username=${encodeURIComponent(username)}`;
             
             console.log('🔌 Подключаемся к:', wsUrl);
             updateStatus('Подключение...', 'connecting');
