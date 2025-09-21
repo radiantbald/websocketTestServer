@@ -77,6 +77,14 @@ logs: ## Показать логи сервера
 update: ## Обновить код и перезапустить сервер
 	@make manage CMD=update
 
+git-update: ## Обновить проект из GitHub (только для сервера)
+	@echo "$(GREEN)Обновляем проект из GitHub...$(NC)"
+	./deploy/update.sh
+
+git-update-force: ## Принудительное обновление из GitHub
+	@echo "$(GREEN)Принудительное обновление из GitHub...$(NC)"
+	./deploy/update.sh --force
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 
