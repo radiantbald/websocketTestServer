@@ -67,6 +67,9 @@ sudo systemctl restart websocket-server
 # Проверить настройку Nginx для qabase.ru
 ./deploy/check-nginx.sh
 
+# Исправить проблемы с Nginx (при ошибках конфигурации)
+./deploy/fix-nginx.sh
+
 # Настроить SSL сертификаты
 ./deploy/setup-ssl.sh
 

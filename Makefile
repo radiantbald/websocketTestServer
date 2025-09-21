@@ -113,6 +113,10 @@ setup-ssl: ## Настроить SSL сертификаты для qabase.ru
 	@echo "$(GREEN)Настраиваем SSL сертификаты...$(NC)"
 	./deploy/setup-ssl.sh
 
+fix-nginx: ## Исправить проблемы с Nginx конфигурацией
+	@echo "$(GREEN)Исправляем проблемы с Nginx...$(NC)"
+	./deploy/fix-nginx.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 
