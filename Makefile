@@ -85,6 +85,10 @@ git-update-force: ## Принудительное обновление из GitH
 	@echo "$(GREEN)Принудительное обновление из GitHub...$(NC)"
 	./deploy/update.sh --force
 
+update-go: ## Обновить Go на сервере
+	@echo "$(GREEN)Обновляем Go на сервере...$(NC)"
+	./deploy/update-go.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 

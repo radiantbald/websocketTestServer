@@ -333,6 +333,22 @@ git pull origin main
 ```
 
 ### Если не собирается Go приложение
+
+#### Проблема с версией Go
+```bash
+# Ошибка: "go.mod file indicates go 1.21, but maximum version supported by tidy is 1.18"
+
+# Решение 1: Обновите Go на сервере
+wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+
+# Решение 2: Понизьте требования в go.mod (временно)
+# Измените в server/go.mod: go 1.21 → go 1.18
+```
+
+#### Другие проблемы сборки
 ```bash
 # Очистите кэш модулей
 go clean -modcache

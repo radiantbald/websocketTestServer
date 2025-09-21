@@ -88,6 +88,20 @@ go build -o websocket-server main.go
 sudo systemctl restart websocket-server
 ```
 
+## 🔧 Исправление проблем
+
+### Проблема с версией Go
+```bash
+# Ошибка: "go.mod file indicates go 1.21, but maximum version supported by tidy is 1.18"
+
+# Решение: Обновите Go
+wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+go version
+```
+
 ## 📊 Мониторинг
 
 ### Логи

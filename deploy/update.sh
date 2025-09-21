@@ -148,11 +148,35 @@ git stash pop || info "Нет сохраненных изменений для �
 log "🔨 Пересобираем приложение..."
 cd $PROJECT_DIR/server
 
+# Проверяем версию Go
+GO_VERSION=$(go version | grep -o 'go[0-9]\+\.[0-9]\+' | sed 's/go//')
+REQUIRED_VERSION="1.21"
+
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$GO_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
+    warning "⚠️  Версия Go $GO_VERSION устарела. Требуется $REQUIRED_VERSION+"
+    log "🔄 Обновляем Go до версии 1.21.5..."
+    
+    # Обновляем Go
+    wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
+    sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+    export PATH=$PATH:/usr/local/go/bin
+    echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+    
+    # Проверяем обновление
+    NEW_VERSION=$(go version | grep -o 'go[0-9]\+\.[0-9]\+' | sed 's/go//')
+    log "✅ Go обновлен до версии $NEW_VERSION"
+    
+    # Очищаем временные файлы
+    rm -f go1.21.5.linux-amd64.tar.gz
+fi
+
 # Обновляем зависимости
+log "📦 Обновляем зависимости..."
 go mod tidy
 go mod download
 
 # Собираем приложение
+log "🔨 Собираем приложение..."
 go build -o websocket-server main.go
 
 # Устанавливаем права
