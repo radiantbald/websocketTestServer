@@ -105,6 +105,14 @@ fix-service: ## Исправить проблемы с сервисом
 	@echo "$(GREEN)Исправляем проблемы с сервисом...$(NC)"
 	./deploy/fix-service.sh
 
+check-nginx: ## Проверить настройку Nginx для qabase.ru
+	@echo "$(GREEN)Проверяем настройку Nginx...$(NC)"
+	./deploy/check-nginx.sh
+
+setup-ssl: ## Настроить SSL сертификаты для qabase.ru
+	@echo "$(GREEN)Настраиваем SSL сертификаты...$(NC)"
+	./deploy/setup-ssl.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 

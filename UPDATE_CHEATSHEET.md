@@ -62,6 +62,18 @@ sudo systemctl restart websocket-server
 ./deploy/setup-service.sh --remove
 ```
 
+### Настройка Nginx и SSL
+```bash
+# Проверить настройку Nginx для qabase.ru
+./deploy/check-nginx.sh
+
+# Настроить SSL сертификаты
+./deploy/setup-ssl.sh
+
+# Проверить доступность сайта
+curl -I https://qabase.ru
+```
+
 ### Полная переустановка
 ```bash
 sudo systemctl stop websocket-server
