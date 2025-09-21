@@ -101,6 +101,10 @@ diagnose-service: ## Диагностика проблем с сервисом
 	@echo "$(GREEN)Диагностируем проблемы с сервисом...$(NC)"
 	./deploy/diagnose-service.sh
 
+fix-service: ## Исправить проблемы с сервисом
+	@echo "$(GREEN)Исправляем проблемы с сервисом...$(NC)"
+	./deploy/fix-service.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 

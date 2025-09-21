@@ -49,6 +49,9 @@ sudo systemctl restart websocket-server
 # Диагностика проблем с сервисом
 ./deploy/diagnose-service.sh
 
+# Исправить проблемы с сервисом (рекомендуется при ошибках)
+./deploy/fix-service.sh
+
 # Показать статус сервиса
 ./deploy/setup-service.sh --status
 
