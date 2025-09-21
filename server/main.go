@@ -164,6 +164,8 @@ func (h *Hub) Run() {
 				}
 				client.Send <- errorMessage
 				close(client.Send)
+				// Закрываем соединение с кодом 1008 (нарушение политики) и понятным сообщением
+				client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(1008, "Username already taken"))
 				client.Conn.Close()
 				continue
 			}
