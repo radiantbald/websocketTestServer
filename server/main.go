@@ -101,14 +101,17 @@ var upgrader = websocket.Upgrader{
 			return true
 		}
 
-		// Разрешенные домены для разработки
+		// Разрешенные домены для продакшена
 		allowedOrigins := []string{
+			"https://qabase.ru",
+			"http://qabase.ru",
+			"https://www.qabase.ru",
+			"http://www.qabase.ru",
+			// Домены для разработки (можно удалить в продакшене)
 			"http://localhost:9092",
 			"http://127.0.0.1:9092",
 			"http://localhost:3000",
 			"http://127.0.0.1:3000",
-			"https://qabase.ru",
-			"http://qabase.ru",
 		}
 
 		for _, allowed := range allowedOrigins {
@@ -365,6 +368,12 @@ func HandleSimple(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleStatus(w http.ResponseWriter, r *http.Request) {
+	// Добавляем заголовки безопасности
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+
 	status := map[string]interface{}{
 		"status":    "running",
 		"timestamp": time.Now(),

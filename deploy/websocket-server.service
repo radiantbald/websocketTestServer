@@ -1,0 +1,35 @@
+[Unit]
+Description=WebSocket Test Server for qabase.ru
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/qabase/server
+ExecStart=/var/www/qabase/server/websocket-server
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=websocket-server
+
+# Ограничения ресурсов
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Переменные окружения
+Environment=GOMAXPROCS=2
+Environment=GOGC=100
+
+# Безопасность
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/qabase/server
+ReadWritePaths=/var/log/websocket-server
+
+[Install]
+WantedBy=multi-user.target
