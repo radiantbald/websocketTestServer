@@ -125,6 +125,14 @@ force-fix-nginx: ## Принудительно исправить проблем
 	@echo "$(GREEN)Принудительно исправляем проблемы с Nginx...$(NC)"
 	./deploy/force-fix-nginx.sh
 
+free-ports: ## Освободить порты 80 и 443
+	@echo "$(GREEN)Освобождаем порты 80 и 443...$(NC)"
+	./deploy/free-ports.sh
+
+fix-ports: ## Полное исправление проблемы с портами
+	@echo "$(GREEN)Полное исправление проблемы с портами...$(NC)"
+	./deploy/fix-ports.sh
+
 backup: ## Создать резервную копию
 	@make manage CMD=backup
 

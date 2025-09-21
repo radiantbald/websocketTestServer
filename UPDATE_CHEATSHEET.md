@@ -70,6 +70,12 @@ sudo systemctl restart websocket-server
 # Диагностика проблем с запуском Nginx
 ./deploy/diagnose-nginx.sh
 
+# Освободить порты 80 и 443 (при ошибке bind)
+./deploy/free-ports.sh
+
+# Полное исправление проблемы с портами
+./deploy/fix-ports.sh
+
 # Исправить проблемы с Nginx (при ошибках конфигурации)
 ./deploy/fix-nginx.sh
 
