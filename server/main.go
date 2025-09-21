@@ -32,6 +32,7 @@ type Client struct {
 // Hub maintains the set of active clients and broadcasts messages
 type Hub struct {
 	clients    map[*Client]bool
+	usernames  map[string]bool // Отслеживание занятых имен пользователей
 	broadcast  chan Message
 	register   chan *Client
 	unregister chan *Client
@@ -128,6 +129,7 @@ var upgrader = websocket.Upgrader{
 func NewHub() *Hub {
 	return &Hub{
 		clients:    make(map[*Client]bool),
+		usernames:  make(map[string]bool),
 		broadcast:  make(chan Message),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -152,8 +154,24 @@ func (h *Hub) Run() {
 				continue
 			}
 
+			// Проверяем уникальность имени пользователя
+			if h.usernames[client.Username] {
+				log.Printf("Rejected client %s: username '%s' is already taken", client.ID, client.Username)
+				errorMessage := Message{
+					Type:      "error",
+					Content:   fmt.Sprintf("Username '%s' is already taken. Please choose a different name.", client.Username),
+					Timestamp: time.Now(),
+				}
+				client.Send <- errorMessage
+				close(client.Send)
+				client.Conn.Close()
+				continue
+			}
+
+			// Регистрируем клиента
 			h.clients[client] = true
-			log.Printf("Client %s connected. Total clients: %d", client.ID, len(h.clients))
+			h.usernames[client.Username] = true
+			log.Printf("Client %s connected as '%s'. Total clients: %d", client.ID, client.Username, len(h.clients))
 
 			// Send welcome message to the new client
 			welcomeMessage := Message{
@@ -174,8 +192,9 @@ func (h *Hub) Run() {
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
+				delete(h.usernames, client.Username) // Освобождаем имя пользователя
 				close(client.Send)
-				log.Printf("Client %s disconnected. Total clients: %d", client.ID, len(h.clients))
+				log.Printf("Client %s disconnected as '%s'. Total clients: %d", client.ID, client.Username, len(h.clients))
 
 				// Notify other clients about disconnection
 				leaveMessage := Message{
