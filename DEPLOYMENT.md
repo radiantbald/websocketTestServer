@@ -8,7 +8,7 @@ Before deploying to GitHub, ensure you have completed the following security che
 
 - [x] **Dependency Vulnerability Scan**: No critical vulnerabilities found
 - [x] **Static Code Analysis**: No issues detected by staticcheck and go vet
-- [x] **CORS Configuration**: Restricted to localhost and development domains
+- [x] **CORS Configuration**: Configured for qabase.ru production domains
 - [x] **Input Validation**: Username and message content validation implemented
 - [x] **Rate Limiting**: Maximum 100 concurrent connections enforced
 - [x] **Error Handling**: Graceful error responses and security logging
@@ -19,8 +19,13 @@ Before deploying to GitHub, ensure you have completed the following security che
 
 1. **CORS Protection**
    ```go
-   // Restricted origins for development
+   // Production domains for qabase.ru
    allowedOrigins := []string{
+       "https://qabase.ru",
+       "http://qabase.ru",
+       "https://www.qabase.ru",
+       "http://www.qabase.ru",
+       // Development domains
        "http://localhost:9092",
        "http://127.0.0.1:9092",
        "http://localhost:3000",
@@ -111,14 +116,17 @@ Perform these tasks regularly:
 
 3. **Update CORS Settings**
    ```go
-   // Current development domains (including qabase.ru)
+   // Current production domains for qabase.ru
    allowedOrigins := []string{
+       "https://qabase.ru",
+       "http://qabase.ru",
+       "https://www.qabase.ru",
+       "http://www.qabase.ru",
+       // Development domains (can be removed in production)
        "http://localhost:9092",
        "http://127.0.0.1:9092",
        "http://localhost:3000",
        "http://127.0.0.1:3000",
-       "https://qabase.ru",
-       "http://qabase.ru",
    }
    
    // TODO: Replace with your production domains

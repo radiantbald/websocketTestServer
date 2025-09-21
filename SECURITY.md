@@ -57,14 +57,17 @@ This WebSocket test server includes the following security measures:
 
 4. **CORS Configuration**
    ```go
-   // Current allowed origins for development
+   // Current production domains for qabase.ru
    allowedOrigins := []string{
+       "https://qabase.ru",
+       "http://qabase.ru",
+       "https://www.qabase.ru",
+       "http://www.qabase.ru",
+       // Development domains (can be removed in production)
        "http://localhost:9092",
        "http://127.0.0.1:9092",
        "http://localhost:3000",
        "http://127.0.0.1:3000",
-       "https://qabase.ru",
-       "http://qabase.ru",
    }
    
    // TODO: For production, replace with your actual domains
