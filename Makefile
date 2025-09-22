@@ -1,12 +1,10 @@
-# Makefile для WebSocket Test Server
-# Проект: qabase.ru
+# WebSocket Test Server - Упрощенный Makefile
 
-.PHONY: help build run test clean deploy ssl-setup manage
+.PHONY: help build run test clean deploy status logs restart
 
 # Переменные
 BINARY_NAME=websocket-server
 BUILD_DIR=server
-DEPLOY_DIR=deploy
 PROJECT_DIR=/var/www/qabase
 
 # Цвета для вывода
@@ -43,131 +41,57 @@ clean: ## Очистить собранные файлы
 	rm -f $(BUILD_DIR)/$(BINARY_NAME)
 	@echo "$(GREEN)✅ Очистка завершена$(NC)"
 
-deploy: ## Деплой на сервер qabase.ru
-	@echo "$(GREEN)Начинаем деплой на qabase.ru...$(NC)"
+deploy: ## Полное развертывание на сервере
+	@echo "$(GREEN)Начинаем полное развертывание на qabase.ru...$(NC)"
 	@echo "$(YELLOW)Убедитесь, что вы находитесь на сервере и имеете права sudo$(NC)"
-	./$(DEPLOY_DIR)/deploy.sh
+	./deploy.sh --full-deploy
 
-ssl-setup: ## Настроить SSL сертификаты
+update: ## Обновить код и перезапустить сервис
+	@echo "$(GREEN)Обновляем код и перезапускаем сервис...$(NC)"
+	./deploy.sh --update-only
+
+nginx: ## Настроить только nginx
+	@echo "$(GREEN)Настраиваем nginx...$(NC)"
+	./deploy.sh --nginx-only
+
+ssl: ## Настроить только SSL
 	@echo "$(GREEN)Настраиваем SSL сертификаты...$(NC)"
-	./$(DEPLOY_DIR)/ssl-setup.sh
+	./deploy.sh --ssl-only
 
-manage: ## Управление сервером (используйте: make manage CMD=start|stop|restart|status|logs)
-	@if [ -z "$(CMD)" ]; then \
-		echo "$(RED)Укажите команду: make manage CMD=start|stop|restart|status|logs|update|test|backup$(NC)"; \
-		exit 1; \
-	fi
-	./$(DEPLOY_DIR)/manage.sh $(CMD)
-
-start: ## Запустить сервер на продакшене
-	@make manage CMD=start
-
-stop: ## Остановить сервер на продакшене
-	@make manage CMD=stop
-
-restart: ## Перезапустить сервер на продакшене
-	@make manage CMD=restart
-
-status: ## Показать статус сервера
-	@make manage CMD=status
-
-logs: ## Показать логи сервера
-	@make manage CMD=logs
-
-update: ## Обновить код и перезапустить сервер
-	@make manage CMD=update
-
-git-update: ## Обновить проект из GitHub (только для сервера)
-	@echo "$(GREEN)Обновляем проект из GitHub...$(NC)"
-	./deploy/update.sh
-
-git-update-force: ## Принудительное обновление из GitHub
-	@echo "$(GREEN)Принудительное обновление из GitHub...$(NC)"
-	./deploy/update.sh --force
-
-update-go: ## Обновить Go на сервере
-	@echo "$(GREEN)Обновляем Go на сервере...$(NC)"
-	./deploy/update-go.sh
-
-force-update-go: ## Принудительно обновить Go (удалить все версии)
-	@echo "$(GREEN)Принудительно обновляем Go...$(NC)"
-	./deploy/force-update-go.sh
-
-setup-service: ## Настроить systemd сервис
+service: ## Настроить только systemd сервис
 	@echo "$(GREEN)Настраиваем systemd сервис...$(NC)"
-	./deploy/setup-service.sh
+	./deploy.sh --service-only
 
-diagnose-service: ## Диагностика проблем с сервисом
-	@echo "$(GREEN)Диагностируем проблемы с сервисом...$(NC)"
-	./deploy/diagnose-service.sh
+status: ## Показать статус всех компонентов
+	@echo "$(GREEN)Проверяем статус компонентов...$(NC)"
+	./deploy.sh --status
 
-fix-service: ## Исправить проблемы с сервисом
-	@echo "$(GREEN)Исправляем проблемы с сервисом...$(NC)"
-	./deploy/fix-service.sh
+logs: ## Показать логи сервиса
+	@echo "$(GREEN)Показываем логи WebSocket сервера...$(NC)"
+	./deploy.sh --logs
 
-check-nginx: ## Проверить настройку Nginx для qabase.ru
-	@echo "$(GREEN)Проверяем настройку Nginx...$(NC)"
-	./deploy/check-nginx.sh
+restart: ## Перезапустить сервис
+	@echo "$(GREEN)Перезапускаем WebSocket сервер...$(NC)"
+	./deploy.sh --restart
 
-setup-ssl: ## Настроить SSL сертификаты для qabase.ru
-	@echo "$(GREEN)Настраиваем SSL сертификаты...$(NC)"
-	./deploy/setup-ssl.sh
-
-fix-nginx: ## Исправить проблемы с Nginx конфигурацией
-	@echo "$(GREEN)Исправляем проблемы с Nginx...$(NC)"
-	./deploy/fix-nginx.sh
-
-diagnose-nginx: ## Диагностика проблем с запуском Nginx
-	@echo "$(GREEN)Диагностируем проблемы с Nginx...$(NC)"
-	./deploy/diagnose-nginx.sh
-
-force-fix-nginx: ## Принудительно исправить проблемы с Nginx
-	@echo "$(GREEN)Принудительно исправляем проблемы с Nginx...$(NC)"
-	./deploy/force-fix-nginx.sh
-
-free-ports: ## Освободить порты 80 и 443
-	@echo "$(GREEN)Освобождаем порты 80 и 443...$(NC)"
-	./deploy/free-ports.sh
-
-fix-ports: ## Полное исправление проблемы с портами
-	@echo "$(GREEN)Полное исправление проблемы с портами...$(NC)"
-	./deploy/fix-ports.sh
-
-backup: ## Создать резервную копию
-	@make manage CMD=backup
-
-# Команды для разработки
-dev: ## Запустить в режиме разработки с автоперезагрузкой
+# Локальные команды для разработки
+dev: build ## Запустить в режиме разработки
 	@echo "$(GREEN)Запускаем в режиме разработки...$(NC)"
-	@echo "$(YELLOW)Установите air для автоперезагрузки: go install github.com/cosmtrek/air@latest$(NC)"
-	cd $(BUILD_DIR) && air
+	cd $(BUILD_DIR) && ./$(BINARY_NAME)
 
-install-deps: ## Установить зависимости для разработки
-	@echo "$(GREEN)Устанавливаем зависимости...$(NC)"
-	go install github.com/cosmtrek/air@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# Команды для продакшена
+prod-deploy: ## Полное развертывание на продакшене
+	@echo "$(GREEN)Полное развертывание на продакшене...$(NC)"
+	./deploy.sh --full-deploy
 
-lint: ## Проверить код линтером
-	@echo "$(GREEN)Проверяем код линтером...$(NC)"
-	cd $(BUILD_DIR) && golangci-lint run
+prod-update: ## Обновление на продакшене
+	@echo "$(GREEN)Обновление на продакшене...$(NC)"
+	./deploy.sh --update-only
 
-# Информация о проекте
-info: ## Показать информацию о проекте
-	@echo "$(GREEN)WebSocket Test Server для qabase.ru$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Структура проекта:$(NC)"
-	@echo "  server/     - Go WebSocket сервер"
-	@echo "  client/     - HTML клиенты для тестирования"
-	@echo "  deploy/     - Скрипты для деплоя"
-	@echo "  docs/       - Документация"
-	@echo ""
-	@echo "$(YELLOW)Основные endpoints:$(NC)"
-	@echo "  /           - Тестовый клиент"
-	@echo "  /websocket  - WebSocket endpoint"
-	@echo "  /status     - Статус сервера"
-	@echo "  /simple     - Простой тестовый клиент"
-	@echo ""
-	@echo "$(YELLOW)Продакшен URLs:$(NC)"
-	@echo "  https://qabase.ru        - Основной сайт"
-	@echo "  wss://qabase.ru/websocket - WebSocket endpoint"
-	@echo "  https://qabase.ru/status - Статус сервера"
+prod-status: ## Статус продакшена
+	@echo "$(GREEN)Статус продакшена...$(NC)"
+	./deploy.sh --status
+
+prod-logs: ## Логи продакшена
+	@echo "$(GREEN)Логи продакшена...$(NC)"
+	./deploy.sh --logs

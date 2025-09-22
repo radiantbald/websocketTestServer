@@ -152,8 +152,8 @@
                         addMessage('received', `❌ Ошибка: ${message.content}`, 'system');
                         
                         // Если это ошибка дублирования имени, показываем алерт
-                        if (message.content.includes('already taken')) {
-                            alert(`❌ Ошибка: ${message.content}\n\nПожалуйста, выберите другое имя пользователя.`);
+                        if (message.content.includes('уже подключен к чату')) {
+                            alert(`❌ Имя пользователя занято!\n\n${message.content}\n\n💡 Попробуйте добавить к имени цифры или символы, например:\n• ${document.getElementById('username').value}2\n• ${document.getElementById('username').value}_new\n• ${document.getElementById('username').value}2024`);
                         }
                         return;
                     }
@@ -174,7 +174,16 @@
                 console.log('❌ WebSocket закрыт:', event.code, event.reason);
                 updateStatus('Отключено', 'disconnected');
                 document.getElementById('connectBtn').textContent = 'Подключиться';
-                addMessage('system', `❌ Соединение закрыто (код: ${event.code})`);
+                
+                // Специальная обработка для дублирования имени
+                if (event.code === 1008) {
+                    const currentUsername = document.getElementById('username').value;
+                    const closeReason = event.reason || 'Пользователь с таким именем уже подключен, придумайте другое имя';
+                    alert(`❌ Имя пользователя занято!\n\n${closeReason}\n\n💡 Попробуйте добавить к имени цифры или символы, например:\n• ${currentUsername}2\n• ${currentUsername}_new\n• ${currentUsername}2024`);
+                    addMessage('system', `❌ Имя пользователя '${currentUsername}' уже занято`);
+                } else {
+                    addMessage('system', `❌ Соединение закрыто (код: ${event.code})`);
+                }
             };
             
             ws.onerror = function(error) {

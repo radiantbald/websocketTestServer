@@ -1,226 +1,265 @@
 # WebSocket Test Server
 
-A comprehensive WebSocket testing solution with a Go server and modern HTML/JavaScript client for manual testing practice.
+Современный WebSocket сервер для тестирования с поддержкой чата, уникальных имен пользователей и real-time коммуникации.
 
-## Project Structure
+## 🚀 Быстрый старт
+
+### Локальная разработка
+
+```bash
+# Клонируйте репозиторий
+git clone https://github.com/radiantbald/websocketTestServer.git
+cd websocketTestServer
+
+# Запустите сервер
+make run
+```
+
+Откройте `http://localhost:9092` в браузере для тестирования.
+
+### Развертывание на сервере
+
+```bash
+# Подключитесь к серверу
+ssh root@your-server-ip
+
+# Клонируйте репозиторий
+git clone https://github.com/radiantbald/websocketTestServer.git
+cd websocketTestServer
+
+# Полное развертывание
+make deploy
+```
+
+## 📁 Структура проекта
 
 ```
 websocket-test-server/
-├── server/           # Go WebSocket server
-│   ├── main.go       # Server implementation
-│   ├── go.mod        # Go dependencies
-│   └── README.md     # Server documentation
-├── client/           # HTML/JavaScript client
-│   ├── test-client.html      # Main client interface
-│   ├── websocket-test.html   # Simple test client
-│   └── README.md     # Client documentation
-├── docs/             # Documentation
-│   ├── PROXYMAN_SETUP.md
-│   ├── WEBSOCKET_PROXYMAN_SETUP.md
-│   └── README.md
-└── README.md         # This file
+├── server/                    # Go WebSocket сервер
+│   ├── main.go               # Основной код сервера
+│   ├── go.mod                # Go зависимости
+│   └── websocket-server      # Скомпилированный бинарник
+├── client/                   # HTML/JavaScript клиент
+│   └── websocket-test.html   # Веб-клиент для тестирования
+├── deploy/                   # Скрипты развертывания
+│   ├── deploy.sh             # Единый скрипт развертывания
+│   ├── nginx-qabase.conf     # Конфигурация nginx
+│   └── websocket-server.service # Systemd сервис
+├── Makefile                  # Команды для управления
+└── README.md                 # Документация
 ```
 
-## Features
+## ✨ Возможности
 
-- **Real-time messaging**: Chat functionality with broadcast messaging
-- **Connection management**: Automatic client registration/unregistration
-- **Message types**: Support for chat, ping/pong, echo, and system messages
-- **Multiple clients**: Support for multiple simultaneous connections (max 100)
-- **Modern client interface**: Responsive HTML client with mobile support
-- **Proxyman integration**: Built-in support for traffic analysis
-- **Detailed logging**: Server-side logging for debugging
-- **REST API**: Status endpoint for server monitoring
-- **Security features**: CORS protection, input validation, rate limiting
-- **Automated security checks**: GitHub Actions for vulnerability scanning
+- **Real-time чат** с поддержкой множественных клиентов
+- **Уникальные имена пользователей** с проверкой дублирования
+- **Автоматические предложения** альтернативных имен
+- **Современный веб-интерфейс** с адаптивным дизайном
+- **WebSocket API** с поддержкой различных типов сообщений
+- **REST API** для мониторинга статуса
+- **Автоматическое развертывание** с nginx и SSL
 
-## Quick Start
+## 🛠️ Команды
 
-### Prerequisites
+### Локальная разработка
 
-- Go 1.21 or newer
-- Web browser for testing
+```bash
+make help          # Показать справку
+make build         # Собрать приложение
+make run           # Запустить сервер локально
+make test          # Протестировать сервер
+make clean         # Очистить собранные файлы
+make dev           # Запустить в режиме разработки
+```
 
-### Installation and Running
+### Развертывание на сервере
 
-1. **Clone or download the project files**
+```bash
+make deploy        # Полное развертывание
+make update        # Обновить код и перезапустить
+make nginx         # Настроить только nginx
+make ssl           # Настроить только SSL
+make service       # Настроить только systemd сервис
+make status        # Показать статус компонентов
+make logs          # Показать логи сервиса
+make restart       # Перезапустить сервис
+```
 
-2. **Install server dependencies**:
-   ```bash
-   cd server
-   go mod tidy
-   ```
+### Прямые команды скрипта
 
-3. **Run the server**:
-   ```bash
-   go run main.go
-   ```
+```bash
+./deploy.sh --full-deploy    # Полное развертывание
+./deploy.sh --update-only    # Только обновление кода
+./deploy.sh --nginx-only     # Только nginx
+./deploy.sh --ssl-only       # Только SSL
+./deploy.sh --status         # Статус компонентов
+./deploy.sh --logs           # Логи сервиса
+./deploy.sh --restart        # Перезапуск сервиса
+./deploy.sh --help           # Справка
+```
 
-4. **Open the test client**:
-   - Navigate to `http://localhost:9092` in your browser
-   - Or open `client/test-client.html` directly
-
-## Components
-
-### Server (`/server`)
-
-Go-based WebSocket server with:
-- WebSocket endpoint at `ws://localhost:9092/websocket`
-- REST API for status monitoring
-- Support for multiple message types
-- Comprehensive logging
-
-[Server Documentation](server/README.md)
-
-### Client (`/client`)
-
-Modern HTML/JavaScript client with:
-- Responsive design with mobile support
-- Real-time chat interface
-- Test scenarios and debugging tools
-- Proxyman integration for traffic analysis
-
-[Client Documentation](client/README.md)
-
-### Documentation (`/docs`)
-
-Additional documentation for:
-- Proxyman setup and configuration
-- WebSocket traffic analysis
-- Advanced testing scenarios
-
-[Documentation](docs/README.md)
-
-## Testing Scenarios
-
-### Basic Connection Testing
-
-1. **Single Connection**:
-   - Click "Connect" to establish a WebSocket connection
-   - Verify the status changes to "Connected"
-   - Check server logs for connection confirmation
-
-2. **Multiple Connections**:
-   - Open multiple browser tabs/windows
-   - Connect from each tab with different usernames
-   - Verify all connections are registered
-
-### Message Testing
-
-1. **Chat Messages**:
-   - Send text messages between connected clients
-   - Verify message broadcasting to all clients
-   - Test message formatting and display
-
-2. **Ping/Pong**:
-   - Use the "Ping" button to test connection health
-   - Verify pong responses in the message log
-
-3. **Echo Messages**:
-   - Send echo messages to test server response
-   - Verify echo functionality works correctly
-
-### Advanced Testing
-
-1. **Connection Stability**:
-   - Test connection recovery after network issues
-   - Verify automatic reconnection behavior
-
-2. **Error Handling**:
-   - Test invalid JSON messages
-   - Verify error message handling
-
-3. **Performance Testing**:
-   - Use "Rapid Messages" to test high-frequency messaging
-   - Monitor server performance under load
-
-## Proxyman Integration
-
-For advanced traffic analysis:
-
-1. **Setup Proxyman** on port 9090
-2. **Configure client** to connect through Proxyman
-3. **Monitor WebSocket traffic** in real-time
-
-[Proxyman Setup Guide](docs/PROXYMAN_SETUP.md)
-
-## API Reference
+## 🌐 API
 
 ### WebSocket Endpoint
 
-- **URL**: `ws://localhost:9092/websocket`
-- **Parameters**: `?username=YourName`
+- **URL**: `ws://localhost:9092/websocket` (локально)
+- **URL**: `wss://qabase.ru/websocket` (продакшен)
+- **Параметры**: `?username=YourName`
 
-### Message Types
+### Типы сообщений
 
-#### Chat Message
+#### Чат сообщение
 ```json
 {
   "type": "chat",
-  "content": "Your message here"
+  "content": "Ваше сообщение"
 }
 ```
 
-#### Ping Message
+#### Ping сообщение
 ```json
 {
   "type": "ping"
 }
 ```
 
-#### Echo Message
+#### Echo сообщение
 ```json
 {
   "type": "echo",
-  "content": "Message to echo"
+  "content": "Сообщение для эха"
 }
 ```
 
 ### REST Endpoints
 
-- **GET /status** - Server status and statistics
-- **GET /** - HTML test client (if configured)
+- **GET /status** - Статус сервера и статистика
+- **GET /** - HTML клиент для тестирования
 
-## Development
+## 🔧 Конфигурация
 
-### Server Development
+### Переменные окружения
+
+Сервер использует следующие настройки по умолчанию:
+
+- **Порт**: 9092
+- **Максимум клиентов**: 100
+- **Максимальная длина имени**: 50 символов
+- **Максимальная длина сообщения**: 1024 символа
+
+### Nginx конфигурация
+
+Автоматически настраивается для:
+- Проксирования WebSocket соединений
+- Обслуживания статических файлов
+- SSL терминации
+
+### Systemd сервис
+
+Автоматически настраивается для:
+- Автозапуска при загрузке системы
+- Управления через systemctl
+- Логирования в journald
+
+## 🧪 Тестирование
+
+### Базовое тестирование
+
+1. **Подключение**: Откройте `http://localhost:9092` и нажмите "Подключиться"
+2. **Чат**: Отправьте сообщение и убедитесь, что оно отображается
+3. **Множественные клиенты**: Откройте несколько вкладок с разными именами
+
+### Тестирование дублирования имен
+
+1. Подключитесь с именем "Тест"
+2. Попробуйте подключиться с тем же именем в другой вкладке
+3. Должно появиться сообщение об ошибке с предложениями альтернативных имен
+
+### Тестирование на продакшене
 
 ```bash
-cd server
-go run main.go
+# Проверка статуса
+curl -f https://qabase.ru/status
+
+# Проверка WebSocket соединения
+wscat -c wss://qabase.ru/websocket
 ```
 
-### Client Development
+## 🔒 Безопасность
 
-Open `client/test-client.html` in your browser for development and testing.
+- **CORS защита** для разрешенных доменов
+- **Валидация входных данных** для имен и сообщений
+- **Ограничение количества соединений**
+- **SSL/TLS шифрование** на продакшене
+- **Автоматическое обновление SSL сертификатов**
 
-## Contributing
+## 📝 Логирование
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+Логи доступны через:
 
-## Security
+```bash
+# Логи systemd сервиса
+journalctl -u websocket-server -f
 
-This project includes several security features:
+# Логи nginx
+tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
+```
 
-- **CORS Protection**: Restricted to localhost and development domains
-- **Input Validation**: Username and message content validation
-- **Rate Limiting**: Maximum 100 concurrent connections
-- **Error Handling**: Graceful error responses and logging
+## 🚀 Развертывание
 
-⚠️ **Important**: This is a test server for development purposes. For production use, implement additional security measures as outlined in [SECURITY.md](SECURITY.md).
+### Требования
 
-### Security Checks
+- Ubuntu/Debian сервер
+- Права root или sudo
+- Домен, указывающий на сервер
 
-The project includes automated security checks via GitHub Actions:
-- Vulnerability scanning with `govulncheck`
-- Static code analysis with `staticcheck`
-- Secret detection with TruffleHog
-- Dependency vulnerability checks
+### Автоматическое развертывание
 
-## License
+```bash
+# Подключитесь к серверу
+ssh root@your-server-ip
 
-This project is open source and available under the MIT License.
+# Клонируйте и разверните
+git clone https://github.com/radiantbald/websocketTestServer.git
+cd websocketTestServer
+make deploy
+```
+
+### Ручное развертывание
+
+```bash
+# 1. Установите зависимости
+apt update && apt install -y nginx certbot python3-certbot-nginx golang-go
+
+# 2. Клонируйте проект
+git clone https://github.com/radiantbald/websocketTestServer.git /var/www/qabase
+cd /var/www/qabase
+
+# 3. Соберите приложение
+cd server && go build -o websocket-server main.go
+
+# 4. Настройте сервисы
+./deploy.sh --full-deploy
+```
+
+## 🤝 Вклад в проект
+
+1. Форкните репозиторий
+2. Создайте ветку для новой функции
+3. Внесите изменения
+4. Протестируйте тщательно
+5. Отправьте pull request
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией MIT. См. файл LICENSE для подробностей.
+
+## 🆘 Поддержка
+
+Если у вас возникли проблемы:
+
+1. Проверьте логи: `make logs`
+2. Проверьте статус: `make status`
+3. Перезапустите сервис: `make restart`
+4. Создайте issue в GitHub репозитории
