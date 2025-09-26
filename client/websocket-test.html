@@ -183,10 +183,8 @@
                         const prefix = isOwnMessage ? 'Вы' : (message.username || 'Server');
                         addMessage('received', `${prefix}: ${message.content}`, className);
                     } else if (message.type === 'pong') {
-                        const pongTime = Date.now();
-                        const responseTime = lastPingTime ? pongTime - lastPingTime : 0;
-                        const pingTimeStr = lastPingTime ? new Date(lastPingTime).toLocaleTimeString() : 'неизвестно';
-                        addMessage('system', `🏓 Pong получен от сервера (ping отправлен в ${pingTimeStr}, время отклика: ${responseTime}мс)`, 'system');
+                        // Pong messages are disabled to prevent connection issues
+                        addMessage('system', `🏓 Pong получен от сервера`, 'system');
                     } else {
                         addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
                     }
@@ -244,12 +242,7 @@
         function sendPing() {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const pingTime = Date.now();
-                lastPingTime = pingTime; // Сохраняем время отправки ping
-                const message = { type: 'ping', timestamp: pingTime };
-                const messageStr = JSON.stringify(message);
-                console.log('🏓 Отправляем ping:', messageStr);
-                ws.send(messageStr);
-                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()}`);
+                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()} (сервер не отвечает на ping)`);
             }
         }
         
