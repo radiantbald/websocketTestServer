@@ -83,13 +83,28 @@
             max-width: 90%;
             border-radius: 10px;
         }
+        .ping-sent { 
+            background: #007bff; 
+            color: white; 
+            margin-left: auto; 
+            text-align: right;
+            border-bottom-right-radius: 5px;
+        }
+        .echo-sent { 
+            background: #007bff; 
+            color: white; 
+            margin-left: auto; 
+            text-align: right;
+            border-bottom-right-radius: 5px;
+        }
         .server { 
             background: #ff8c00; 
             color: white; 
             font-weight: bold;
-            margin-right: auto;
-            text-align: left;
-            border-bottom-left-radius: 5px;
+            margin: 0 auto;
+            text-align: center;
+            max-width: 90%;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -281,7 +296,7 @@
                 const messageStr = JSON.stringify(message);
                 console.log('🏓 Отправляем ping:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()}`);
+                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()}`, 'ping-sent');
             }
         }
         
@@ -291,7 +306,7 @@
                 const content = input.value.trim();
                 
                 if (content === '') {
-                    addMessage('system', '🔄 Echo: Пустое сообщение', 'system');
+                    addMessage('system', '🔄 Echo: Пустое сообщение', 'echo-sent');
                     return;
                 }
                 
@@ -299,7 +314,7 @@
                 const messageStr = JSON.stringify(message);
                 console.log('🔄 Отправляем echo:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', `🔄 Отправлен echo: "${content}"`);
+                addMessage('system', `🔄 Отправлен echo: "${content}"`, 'echo-sent');
             }
         }
         
