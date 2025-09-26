@@ -276,7 +276,10 @@ func (c *Client) ReadPump(hub *Hub) {
 		// Set client information
 		msg.Username = c.Username
 		msg.ClientID = c.ID
-		msg.Timestamp = time.Now()
+		// Не перезаписываем timestamp для ping сообщений
+		if msg.Type != "ping" {
+			msg.Timestamp = time.Now()
+		}
 
 		// Handle different message types
 		switch msg.Type {
