@@ -285,6 +285,7 @@ func (c *Client) ReadPump(hub *Hub) {
 			hub.broadcast <- msg
 		case "ping":
 			// Respond to ping with pong
+			log.Printf("Ping received from %s", c.Username)
 			pongMessage := Message{
 				Type:      "pong",
 				Content:   "pong",
@@ -292,6 +293,7 @@ func (c *Client) ReadPump(hub *Hub) {
 				Timestamp: time.Now(),
 			}
 			c.Send <- pongMessage
+			log.Printf("Pong sent to %s", c.Username)
 		case "echo":
 			// Echo the message back to the sender
 			echoMessage := Message{
