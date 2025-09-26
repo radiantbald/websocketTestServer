@@ -255,8 +255,8 @@ func (c *Client) ReadPump(hub *Hub) {
 			}
 			break
 		}
-		
-		log.Printf("Message received from %s: type=%s, content=%s", c.Username, msg.Type, msg.Content)
+
+		// log.Printf("Message received from %s: type=%s, content=%s", c.Username, msg.Type, msg.Content)
 
 		// Валидируем содержимое сообщения (кроме ping/pong)
 		if msg.Type != "ping" && msg.Type != "pong" {
@@ -278,10 +278,8 @@ func (c *Client) ReadPump(hub *Hub) {
 		// Set client information
 		msg.Username = c.Username
 		msg.ClientID = c.ID
-		// Не перезаписываем timestamp для ping сообщений
-		if msg.Type != "ping" {
-			msg.Timestamp = time.Now()
-		}
+		// Устанавливаем timestamp для всех сообщений
+		msg.Timestamp = time.Now()
 
 		// Handle different message types
 		switch msg.Type {
@@ -289,20 +287,14 @@ func (c *Client) ReadPump(hub *Hub) {
 			log.Printf("Chat message from %s: %s", c.Username, msg.Content)
 			hub.broadcast <- msg
 		case "ping":
-			// Respond to ping with pong
-			log.Printf("Ping received from %s", c.Username)
+			// Simple ping response
 			pongMessage := Message{
 				Type:      "pong",
 				Content:   "pong",
 				Username:  "Server",
 				Timestamp: time.Now(),
 			}
-			select {
-			case c.Send <- pongMessage:
-				log.Printf("Pong sent to %s", c.Username)
-			default:
-				log.Printf("Failed to send pong to %s", c.Username)
-			}
+			c.Send <- pongMessage
 		case "echo":
 			// Echo the message back to the sender
 			echoMessage := Message{
