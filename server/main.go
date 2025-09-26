@@ -286,6 +286,7 @@ func (c *Client) ReadPump(hub *Hub) {
 			pongMessage := Message{
 				Type:      "pong",
 				Content:   "pong",
+				Username:  "Server",
 				Timestamp: time.Now(),
 			}
 			c.Send <- pongMessage
