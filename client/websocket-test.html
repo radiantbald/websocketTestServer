@@ -54,14 +54,43 @@
             background: #f8f9fa;
         }
         .message {
-            margin: 5px 0;
-            padding: 5px;
-            border-radius: 4px;
+            margin: 8px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
         }
-        .sent { background: #d1ecf1; text-align: right; }
-        .received { background: #d4edda; }
-        .system { background: #fff3cd; }
-        .server { background: #ff8c00; color: white; font-weight: bold; }
+        .sent { 
+            background: #007bff; 
+            color: white; 
+            margin-left: auto; 
+            text-align: right;
+            border-bottom-right-radius: 5px;
+        }
+        .received { 
+            background: #e9ecef; 
+            color: #333;
+            margin-right: auto;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
+        .system { 
+            background: #fff3cd; 
+            color: #856404;
+            margin: 0 auto;
+            text-align: center;
+            max-width: 90%;
+            border-radius: 10px;
+        }
+        .server { 
+            background: #ff8c00; 
+            color: white; 
+            font-weight: bold;
+            margin-right: auto;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
     </style>
 </head>
 <body>
