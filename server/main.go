@@ -256,20 +256,22 @@ func (c *Client) ReadPump(hub *Hub) {
 			break
 		}
 
-		// Валидируем содержимое сообщения
-		validatedContent, err := validateMessageContent(msg.Content)
-		if err != nil {
-			log.Printf("Invalid message content from %s: %v", c.Username, err)
-			errorMessage := Message{
-				Type:      "error",
-				Content:   fmt.Sprintf("Invalid message: %v", err),
-				Username:  "Server",
-				Timestamp: time.Now(),
+		// Валидируем содержимое сообщения (кроме ping/pong)
+		if msg.Type != "ping" && msg.Type != "pong" {
+			validatedContent, err := validateMessageContent(msg.Content)
+			if err != nil {
+				log.Printf("Invalid message content from %s: %v", c.Username, err)
+				errorMessage := Message{
+					Type:      "error",
+					Content:   fmt.Sprintf("Invalid message: %v", err),
+					Username:  "Server",
+					Timestamp: time.Now(),
+				}
+				c.Send <- errorMessage
+				continue
 			}
-			c.Send <- errorMessage
-			continue
+			msg.Content = validatedContent
 		}
-		msg.Content = validatedContent
 
 		// Set client information
 		msg.Username = c.Username
@@ -288,6 +290,10 @@ func (c *Client) ReadPump(hub *Hub) {
 				Content:   "pong",
 				Username:  "Server",
 				Timestamp: time.Now(),
+			}
+			// Если в ping есть timestamp, сохраняем его для измерения задержки
+			if msg.Timestamp.Unix() > 0 {
+				pongMessage.Content = fmt.Sprintf("pong (ping sent at %d)", msg.Timestamp.Unix())
 			}
 			c.Send <- pongMessage
 		case "echo":
