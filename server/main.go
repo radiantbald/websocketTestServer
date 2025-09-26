@@ -287,14 +287,8 @@ func (c *Client) ReadPump(hub *Hub) {
 			log.Printf("Chat message from %s: %s", c.Username, msg.Content)
 			hub.broadcast <- msg
 		case "ping":
-			// Simple ping response
-			pongMessage := Message{
-				Type:      "pong",
-				Content:   "pong",
-				Username:  "Server",
-				Timestamp: time.Now(),
-			}
-			c.Send <- pongMessage
+			// Ignore ping messages to prevent connection issues
+			// Do nothing - let client handle ping timeout
 		case "echo":
 			// Echo the message back to the sender
 			echoMessage := Message{
