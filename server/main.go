@@ -239,7 +239,7 @@ func (c *Client) ReadPump(hub *Hub) {
 		c.Conn.Close()
 	}()
 
-	c.Conn.SetReadLimit(512)
+	c.Conn.SetReadLimit(1024)
 	c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	c.Conn.SetPongHandler(func(string) error {
 		c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
@@ -251,10 +251,12 @@ func (c *Client) ReadPump(hub *Hub) {
 		err := c.Conn.ReadJSON(&msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket error: %v", err)
+				log.Printf("WebSocket error from %s: %v", c.Username, err)
 			}
 			break
 		}
+		
+		log.Printf("Message received from %s: type=%s, content=%s", c.Username, msg.Type, msg.Content)
 
 		// Валидируем содержимое сообщения (кроме ping/pong)
 		if msg.Type != "ping" && msg.Type != "pong" {
@@ -295,8 +297,12 @@ func (c *Client) ReadPump(hub *Hub) {
 				Username:  "Server",
 				Timestamp: time.Now(),
 			}
-			c.Send <- pongMessage
-			log.Printf("Pong sent to %s", c.Username)
+			select {
+			case c.Send <- pongMessage:
+				log.Printf("Pong sent to %s", c.Username)
+			default:
+				log.Printf("Failed to send pong to %s", c.Username)
+			}
 		case "echo":
 			// Echo the message back to the sender
 			echoMessage := Message{
