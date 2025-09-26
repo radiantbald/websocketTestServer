@@ -304,10 +304,10 @@ func (c *Client) ReadPump(hub *Hub) {
 				}
 			}()
 		case "echo":
-			// Echo the message back to the sender
+			// Echo the exact message back to the sender
 			echoMessage := Message{
 				Type:      "echo",
-				Content:   fmt.Sprintf("Echo: %s", msg.Content),
+				Content:   msg.Content, // Возвращаем точно то же содержимое
 				Username:  "Server",
 				Timestamp: time.Now(),
 			}

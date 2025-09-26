@@ -254,11 +254,19 @@
         
         function sendEcho() {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = { type: 'echo', content: 'Test echo message' };
+                const input = document.getElementById('messageInput');
+                const content = input.value.trim();
+                
+                if (content === '') {
+                    addMessage('system', '🔄 Echo: Пустое сообщение', 'system');
+                    return;
+                }
+                
+                const message = { type: 'echo', content: content };
                 const messageStr = JSON.stringify(message);
                 console.log('🔄 Отправляем echo:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', '🔄 Отправлен echo');
+                addMessage('system', `🔄 Отправлен echo: "${content}"`);
             }
         }
         
