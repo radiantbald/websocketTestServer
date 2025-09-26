@@ -422,7 +422,7 @@ func main() {
 			HandleWebSocket(hub, w, r)
 		} else {
 			// Если это обычный HTTP запрос, отдаем тестовую страницу
-			http.ServeFile(w, r, "../client/test-client.html")
+			http.ServeFile(w, r, "../client/websocket-test.html")
 		}
 	})
 	http.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
