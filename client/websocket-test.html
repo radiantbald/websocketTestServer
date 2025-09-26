@@ -70,7 +70,8 @@
         <div id="status" class="status disconnected">Отключено</div>
         
         <div>
-            <input type="text" id="username" placeholder="Имя пользователя" value="Тестировщик">
+            <input type="text" id="username" placeholder="Имя пользователя" value="">
+            <button onclick="document.getElementById('username').value = getRandomCharacter()" title="Случайное имя">🎲</button>
             <button id="connectBtn" onclick="toggleConnection()">Подключиться</button>
         </div>
         
@@ -90,6 +91,25 @@
 
     <script>
         let ws = null;
+        let lastPingTime = null;
+        
+        // Персонажи из "Властелина колец"
+        const lotrCharacters = [
+            'Гэндальф', 'Арагорн', 'Леголас', 'Гимли', 'Боромир', 'Фродо', 'Сэм', 'Пиппин', 'Мерри',
+            'Галадриэль', 'Элронд', 'Арвен', 'Эовин', 'Теоден', 'Эомер', 'Фарамир', 'Денетор',
+            'Голлум', 'Саурон', 'Саруман', 'Грима', 'Балрог', 'Назгул', 'Том Бомбадил', 'Голдберри',
+            'Бильбо', 'Торин', 'Траин', 'Дейн', 'Бард', 'Трандуил', 'Традуил', 'Келеборн'
+        ];
+        
+        // Генерируем случайное имя персонажа
+        function getRandomCharacter() {
+            return lotrCharacters[Math.floor(Math.random() * lotrCharacters.length)];
+        }
+        
+        // Устанавливаем случайное имя при загрузке страницы
+        window.onload = function() {
+            document.getElementById('username').value = getRandomCharacter();
+        };
         
         function updateStatus(status, className) {
             const statusEl = document.getElementById('status');
@@ -162,6 +182,11 @@
                         const className = isOwnMessage ? 'sent' : 'received';
                         const prefix = isOwnMessage ? 'Вы' : (message.username || 'Server');
                         addMessage('received', `${prefix}: ${message.content}`, className);
+                    } else if (message.type === 'pong') {
+                        const pongTime = Date.now();
+                        const responseTime = lastPingTime ? pongTime - lastPingTime : 0;
+                        const pingTimeStr = lastPingTime ? new Date(lastPingTime).toLocaleTimeString() : 'неизвестно';
+                        addMessage('system', `🏓 Pong получен от сервера (ping отправлен в ${pingTimeStr}, время отклика: ${responseTime}мс)`, 'system');
                     } else {
                         addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
                     }
@@ -218,11 +243,13 @@
         
         function sendPing() {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = { type: 'ping' };
+                const pingTime = Date.now();
+                lastPingTime = pingTime; // Сохраняем время отправки ping
+                const message = { type: 'ping', timestamp: pingTime };
                 const messageStr = JSON.stringify(message);
                 console.log('🏓 Отправляем ping:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', '🏓 Отправлен ping');
+                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()}`);
             }
         }
         
