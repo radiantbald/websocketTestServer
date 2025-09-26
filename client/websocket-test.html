@@ -61,6 +61,7 @@
         .sent { background: #d1ecf1; text-align: right; }
         .received { background: #d4edda; }
         .system { background: #fff3cd; }
+        .server { background: #ff8c00; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -187,7 +188,10 @@
                         const responseTime = lastPingTime ? pongTime - lastPingTime : 0;
                         addMessage('system', `🏓 Pong получен от сервера (время отклика: ${responseTime}мс)`, 'system');
                     } else {
-                        addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, 'received');
+                        // Определяем стиль в зависимости от отправителя
+                        const isFromServer = message.username === 'Server';
+                        const className = isFromServer ? 'server' : 'received';
+                        addMessage('received', `${message.username || 'Server'}: ${message.content || event.data}`, className);
                     }
                 } catch (e) {
                     addMessage('received', `Raw: ${event.data}`, 'received');
