@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -27,6 +28,7 @@ type Client struct {
 	Conn     *websocket.Conn
 	Send     chan Message
 	Username string
+	mu       sync.Mutex // Мьютекс для защиты от конкурентного доступа
 }
 
 // Hub maintains the set of active clients and broadcasts messages
@@ -137,6 +139,12 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Hub panic recovered: %v", r)
+		}
+	}()
+
 	for {
 		select {
 		case client := <-h.register:
@@ -157,16 +165,12 @@ func (h *Hub) Run() {
 			// Проверяем уникальность имени пользователя
 			if h.usernames[client.Username] {
 				log.Printf("Rejected client %s: username '%s' is already taken", client.ID, client.Username)
-				errorMessage := Message{
-					Type:      "error",
-					Content:   fmt.Sprintf("❌ Пользователь с именем '%s' уже подключен к чату. Пожалуйста, выберите другое имя.", client.Username),
-					Timestamp: time.Now(),
-				}
-				client.Send <- errorMessage
-				close(client.Send)
-				// Закрываем соединение с кодом 1008 и понятным сообщением
+
+				// Безопасно закрываем соединение без отправки сообщения в канал
+				// чтобы избежать конкурентного доступа
 				client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(1008, "Пользователь с таким именем уже подключен, придумайте другое имя"))
 				client.Conn.Close()
+				close(client.Send)
 				continue
 			}
 
@@ -308,7 +312,7 @@ func (c *Client) ReadPump(hub *Hub) {
 			// Echo the exact message back to the sender
 			content := msg.Content
 			if content == "" {
-				// Для пустого сообщения возвращаем пустую строку в кавычках
+				// Для пустого сообщения возвращаем кавычки
 				content = "\"\""
 			}
 			echoMessage := Message{
@@ -341,22 +345,29 @@ func (c *Client) WritePump() {
 	for {
 		select {
 		case message, ok := <-c.Send:
+			c.mu.Lock()
 			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.mu.Unlock()
 				return
 			}
 
 			if err := c.Conn.WriteJSON(message); err != nil {
 				log.Printf("Write error: %v", err)
+				c.mu.Unlock()
 				return
 			}
+			c.mu.Unlock()
 
 		case <-ticker.C:
+			c.mu.Lock()
 			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				c.mu.Unlock()
 				return
 			}
+			c.mu.Unlock()
 		}
 	}
 }

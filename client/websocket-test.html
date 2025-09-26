@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test - Simple</title>
+    <title>Candy Chat</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,20 +19,36 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .status {
-            padding: 10px;
-            margin: 10px 0;
+            padding: 8px 12px;
+            margin: 0;
             border-radius: 4px;
             font-weight: bold;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
         .connected { background: #d4edda; color: #155724; }
         .disconnected { background: #f8d7da; color: #721c24; }
         .connecting { background: #fff3cd; color: #856404; }
         
+        /* Стили для валидации имени */
+        .username-error {
+            border: 2px solid #dc3545 !important;
+            background-color: #f8d7da !important;
+        }
+        .username-error::placeholder {
+            color: #dc3545 !important;
+        }
+        
         input, button {
-            padding: 10px;
+            padding: 8px 12px;
             margin: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            height: 40px;
+            box-sizing: border-box;
         }
         button {
             background: #007bff;
@@ -54,45 +70,47 @@
             background: #f8f9fa;
         }
         .message {
-            margin: 8px 0;
-            padding: 10px 15px;
+            margin: 4px 0;
+            padding: 6px 12px;
             border-radius: 18px;
+            width: fit-content;
             max-width: 70%;
             word-wrap: break-word;
             position: relative;
         }
         .sent { 
-            background: #007bff; 
-            color: white; 
+            background: #d4edda; /* Светло-зеленый фон как у индикатора "Подключено" */
+            color: #000; /* Черный текст */
             margin-left: auto; 
             text-align: right;
             border-bottom-right-radius: 5px;
         }
         .received { 
-            background: #e9ecef; 
-            color: #333;
+            background: #d1ecf1; /* Голубой фон */
+            color: #000; /* Черный текст */
             margin-right: auto;
             text-align: left;
             border-bottom-left-radius: 5px;
         }
         .system { 
-            background: #fff3cd; 
-            color: #856404;
+            background: transparent; 
+            color: #666;
             margin: 0 auto;
             text-align: center;
             max-width: 90%;
             border-radius: 10px;
+            padding: 4px 8px;
         }
         .ping-sent { 
-            background: #007bff; 
-            color: white; 
+            background: rgba(0, 128, 0, 0.5); /* Зеленый с прозрачностью 50% */
+            color: #333; 
             margin-left: auto; 
             text-align: right;
             border-bottom-right-radius: 5px;
         }
         .echo-sent { 
-            background: #007bff; 
-            color: white; 
+            background: rgba(0, 128, 0, 0.5); /* Зеленый с прозрачностью 50% */
+            color: #333; 
             margin-left: auto; 
             text-align: right;
             border-bottom-right-radius: 5px;
@@ -106,49 +124,106 @@
             max-width: 90%;
             border-radius: 10px;
         }
+        .pong-received { 
+            background: rgba(255, 255, 0, 0.5); /* Желтый с прозрачностью 50% */
+            color: #333;
+            margin-right: auto;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
+        .echo-received { 
+            background: rgba(255, 255, 0, 0.5); /* Желтый с прозрачностью 50% */
+            color: #333;
+            margin-right: auto;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
+        
+        /* Анимация для меню действий */
+        .action-menu {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.2s ease-out;
+            pointer-events: none;
+        }
+        
+        .action-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔌 WebSocket Test (Simple)</h1>
+        <h1>🍭 Candy Chat</h1>
         
-        <div id="status" class="status disconnected">Отключено</div>
-        
-        <div>
-            <input type="text" id="username" placeholder="Имя пользователя" value="">
+        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
             <button onclick="document.getElementById('username').value = getRandomCharacter()" title="Случайное имя">🎲</button>
-            <button id="connectBtn" onclick="toggleConnection()">Подключиться</button>
-        </div>
-        
-        <div id="messageSection" style="display: none;">
-            <input type="text" id="messageInput" placeholder="Введите сообщение..." style="width: 70%;">
-            <button id="sendBtn" onclick="sendMessage()">Отправить</button>
-            
-            <div>
-                <button onclick="sendPing()">Ping</button>
-                <button onclick="sendEcho()">Echo</button>
-                <button onclick="clearMessages()">Очистить</button>
-            </div>
+            <input type="text" id="username" placeholder="Имя пользователя" value="" style="flex: 1;">
+            <div id="status" class="status disconnected" style="width: 120px; flex-shrink: 0;">Отключено</div>
+            <button id="connectBtn" onclick="toggleConnection()" style="width: 140px; flex-shrink: 0;">Подключиться</button>
         </div>
         
         <div class="messages" id="messages"></div>
+        
+        <div id="messageSection" style="display: none; width: 100%; align-items: center; gap: 10px; position: relative;">
+            <input type="text" id="messageInput" placeholder="Введите сообщение..." style="flex: 1;">
+            <button id="sendBtn" onclick="sendMessage()" style="padding: 8px 16px;">Отправить</button>
+            <button id="actionBtn" onclick="toggleActionMenu()" style="width: 40px; border: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;">⋯</button>
+            
+            <div id="actionMenu" class="action-menu" style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 1000; top: 45px; right: 0;">
+                <div onclick="executeAction('ping')" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;">Ping</div>
+                <div onclick="executeAction('echo')" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;">Echo</div>
+                <div onclick="executeAction('clear')" style="padding: 8px 12px; cursor: pointer;">Очистить</div>
+            </div>
+        </div>
     </div>
 
     <script>
         let ws = null;
         let lastPingTime = null;
+        let isFirstMessage = true;
         
-        // Персонажи из "Властелина колец"
-        const lotrCharacters = [
-            'Гэндальф', 'Арагорн', 'Леголас', 'Гимли', 'Боромир', 'Фродо', 'Сэм', 'Пиппин', 'Мерри',
-            'Галадриэль', 'Элронд', 'Арвен', 'Эовин', 'Теоден', 'Эомер', 'Фарамир', 'Денетор',
-            'Голлум', 'Саурон', 'Саруман', 'Грима', 'Балрог', 'Назгул', 'Том Бомбадил', 'Голдберри',
-            'Бильбо', 'Торин', 'Траин', 'Дейн', 'Бард', 'Трандуил', 'Традуил', 'Келеборн'
+        // Названия сладостей с эмодзи
+        const candyNames = [
+            '🍫 Шоколад', '🍯 Карамель', '🍊 Мармелад', '☁️ Зефир', '🍪 Пряник', '🍪 Печенье', '🎂 Торт', '🧁 Пирожное',
+            '🍦 Мороженое', '🍬 Конфета', '🍭 Леденец', '🍮 Желе', '🍮 Пудинг', '🧁 Кекс', '🧇 Вафля', '🥐 Круассан',
+            '🥖 Булочка', '🍩 Пончик', '🧀 Чизкейк', '🍰 Тирамису', '🍫 Трюфель', '🍫 Пралине', '🍪 Макарон', '🧁 Эклер',
+            '🍰 Наполеон', '🍯 Медовик', '🍰 Сметанник', '🎂 Киевский торт', '☁️ Птичье молоко', '🍫 Брауни', '🍦 Канноли', '🧁 Профитроли'
         ];
         
-        // Генерируем случайное имя персонажа
+        // Генерируем случайное название сладости
         function getRandomCharacter() {
-            return lotrCharacters[Math.floor(Math.random() * lotrCharacters.length)];
+            return candyNames[Math.floor(Math.random() * candyNames.length)];
+        }
+        
+        // Переключение меню действий
+        function toggleActionMenu() {
+            const menu = document.getElementById('actionMenu');
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+            }
+        }
+        
+        // Выполнение действия из меню
+        function executeAction(action) {
+            switch(action) {
+                case 'ping':
+                    sendPing();
+                    break;
+                case 'echo':
+                    sendEcho();
+                    break;
+                case 'clear':
+                    clearMessages();
+                    break;
+            }
+            
+            // Скрываем меню после выполнения действия
+            document.getElementById('actionMenu').classList.remove('show');
         }
         
         // Устанавливаем случайное имя при загрузке страницы
@@ -156,26 +231,52 @@
             document.getElementById('username').value = getRandomCharacter();
         };
         
+        // Закрытие меню при клике вне его
+        document.addEventListener('click', function(event) {
+            const actionBtn = document.getElementById('actionBtn');
+            const actionMenu = document.getElementById('actionMenu');
+            
+            if (event.target !== actionBtn && event.target !== actionMenu && !actionMenu.contains(event.target)) {
+                actionMenu.classList.remove('show');
+            }
+        });
+        
         function updateStatus(status, className) {
             const statusEl = document.getElementById('status');
             statusEl.textContent = status;
             statusEl.className = `status ${className}`;
             
             const messageSection = document.getElementById('messageSection');
+            const randomButton = document.querySelector('button[onclick*="getRandomCharacter"]');
+            const usernameInput = document.getElementById('username');
+            
             if (className === 'connected') {
-                messageSection.style.display = 'block';
+                messageSection.style.display = 'flex';
+                // Скрываем кнопку рандомайзера и поле ввода имени при подключении
+                if (randomButton) randomButton.style.display = 'none';
+                if (usernameInput) usernameInput.style.display = 'none';
+                // Растягиваем индикатор статуса по ширине экрана при подключении
+                statusEl.style.width = '100%';
+                statusEl.style.flex = '1';
             } else {
                 messageSection.style.display = 'none';
+                // Показываем кнопку рандомайзера и поле ввода имени при отключении
+                if (randomButton) randomButton.style.display = 'flex';
+                if (usernameInput) usernameInput.style.display = 'block';
+                // Возвращаем фиксированную ширину для индикатора статуса при отключении
+                statusEl.style.width = '120px';
+                statusEl.style.flex = 'none';
             }
         }
         
-        function addMessage(type, content, className = '') {
+        function addMessage(type, content, className = '', timestamp = null) {
             const messagesEl = document.getElementById('messages');
             const messageEl = document.createElement('div');
             messageEl.className = `message ${className}`;
             
-            const timestamp = new Date().toLocaleTimeString();
-            messageEl.innerHTML = `<strong>[${timestamp}]</strong> ${content}`;
+            // Если время не передано, генерируем текущее время
+            const messageTime = timestamp || new Date().toLocaleTimeString();
+            messageEl.innerHTML = `${content}<br><span style="font-size: 0.66em; font-weight: normal; margin-top: 0.25em; display: block; color: #666;">${messageTime}</span>`;
             
             messagesEl.appendChild(messageEl);
             messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -190,8 +291,28 @@
         }
         
         function connect() {
-            const username = document.getElementById('username').value || 'Anonymous';
-            const wsUrl = `wss://qabase.ru/api/websocket?username=${encodeURIComponent(username)}`;
+            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value.trim();
+            
+            // Валидация имени пользователя
+            if (!username) {
+                usernameInput.classList.add('username-error');
+                usernameInput.placeholder = 'Введите имя';
+                return;
+            }
+            
+            // Убираем класс ошибки если он был
+            usernameInput.classList.remove('username-error');
+            
+            // Определяем URL в зависимости от хоста
+            let wsUrl;
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // Локальная разработка
+                wsUrl = `ws://localhost:9092/websocket?username=${encodeURIComponent(username)}`;
+            } else {
+                // Продакшн на qabase.ru
+                wsUrl = `wss://qabase.ru/api/websocket?username=${encodeURIComponent(username)}`;
+            }
             
             console.log('🔌 Подключаемся к:', wsUrl);
             updateStatus('Подключение...', 'connecting');
@@ -200,9 +321,10 @@
             
             ws.onopen = function(event) {
                 console.log('✅ WebSocket подключен');
-                updateStatus('Подключено', 'connected');
+                const username = document.getElementById('username').value || 'Anonymous';
+                updateStatus(`Подключено - ${username}`, 'connected');
                 document.getElementById('connectBtn').textContent = 'Отключиться';
-                addMessage('system', '✅ Подключено к WebSocket серверу');
+                // Уведомление о подключении будет показано после получения подтверждения от сервера
             };
             
             ws.onmessage = function(event) {
@@ -211,6 +333,11 @@
                     const message = JSON.parse(event.data);
                     const currentUsername = document.getElementById('username').value || 'Anonymous';
                     const isOwnMessage = message.username === currentUsername;
+                    
+                    // Сбрасываем флаг первого сообщения
+                    if (isFirstMessage) {
+                        isFirstMessage = false;
+                    }
                     
                     // Специальная обработка ошибок
                     if (message.type === 'error') {
@@ -226,16 +353,20 @@
                     if (message.type === 'chat') {
                         const className = isOwnMessage ? 'sent' : 'received';
                         const prefix = isOwnMessage ? 'Вы' : (message.username || 'Server');
-                        addMessage('received', `${prefix}: ${message.content}`, className);
+                        const messageType = isOwnMessage ? 'sent' : 'received';
+                        addMessage(messageType, `${prefix}: ${message.content}`, className);
                     } else if (message.type === 'pong') {
                         const pongTime = Date.now();
                         const responseTime = lastPingTime ? pongTime - lastPingTime : 0;
-                        addMessage('system', `🏓 Pong получен от сервера (время отклика: ${responseTime}мс)`, 'system');
+                        addMessage('system', `🏓 Pong (время отклика: ${responseTime}мс)`, 'pong-received');
                     } else if (message.type === 'echo') {
                         // Специальная обработка для echo сообщений
                         const isFromServer = message.username === 'Server';
-                        const className = isFromServer ? 'server' : 'received';
+                        const className = isFromServer ? 'echo-received' : 'received';
                         addMessage('received', `🔄 Echo: ${message.content}`, className);
+                    } else if (message.type === 'system') {
+                        // Специальная обработка для системных сообщений
+                        addMessage('system', message.content, 'system');
                     } else {
                         // Определяем стиль в зависимости от отправителя
                         const isFromServer = message.username === 'Server';
@@ -252,14 +383,24 @@
                 updateStatus('Отключено', 'disconnected');
                 document.getElementById('connectBtn').textContent = 'Подключиться';
                 
+                // Очищаем чат при отключении
+                clearMessages();
+                
+                // Сбрасываем флаг для следующего подключения
+                isFirstMessage = true;
+                
                 // Специальная обработка для дублирования имени
                 if (event.code === 1008) {
-                    const currentUsername = document.getElementById('username').value;
+                    const usernameInput = document.getElementById('username');
+                    const currentUsername = usernameInput.value;
+                    
+                    // Подсвечиваем поле имени красным
+                    usernameInput.classList.add('username-error');
+                    usernameInput.placeholder = 'Имя занято';
+                    
+                    // Отправляем сообщение об ошибке в чат
                     const closeReason = event.reason || 'Пользователь с таким именем уже подключен, придумайте другое имя';
-                    alert(`❌ Имя пользователя занято!\n\n${closeReason}\n\n💡 Попробуйте добавить к имени цифры или символы, например:\n• ${currentUsername}2\n• ${currentUsername}_new\n• ${currentUsername}2024`);
-                    addMessage('system', `❌ Имя пользователя '${currentUsername}' уже занято`);
-                } else {
-                    addMessage('system', `❌ Соединение закрыто (код: ${event.code})`);
+                    addMessage('system', `❌ ${closeReason}`);
                 }
             };
             
@@ -273,6 +414,8 @@
             if (ws) {
                 ws.close();
             }
+            // Очищаем чат при отключении
+            clearMessages();
         }
         
         function sendMessage() {
@@ -301,7 +444,7 @@
                 const messageStr = JSON.stringify(message);
                 console.log('🏓 Отправляем ping:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', `🏓 Ping отправлен в ${new Date(pingTime).toLocaleTimeString()}`, 'ping-sent');
+                addMessage('system', `🏓 Ping`, 'ping-sent');
             }
         }
         
@@ -315,7 +458,7 @@
                 const messageStr = JSON.stringify(message);
                 console.log('🔄 Отправляем echo:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', `🔄 Отправлен echo: "${content || 'пустое сообщение'}"`, 'echo-sent');
+                addMessage('system', `🔄 Echo: ${content || '""'}`, 'echo-sent');
             }
         }
         
@@ -331,7 +474,6 @@
         });
         
         console.log('🚀 WebSocket Test загружен');
-        addMessage('system', '🚀 WebSocket Test загружен. Нажмите "Подключиться" для начала тестирования.');
     </script>
 </body>
 </html>
