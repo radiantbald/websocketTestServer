@@ -291,11 +291,6 @@ func (c *Client) ReadPump(hub *Hub) {
 				Username:  "Server",
 				Timestamp: time.Now(),
 			}
-			// Если в ping есть timestamp, сохраняем его для измерения задержки
-			if msg.Timestamp.Unix() > 0 {
-				pingTimeStr := msg.Timestamp.Format("15:04:05")
-				pongMessage.Content = fmt.Sprintf("pong (ping sent at %s)", pingTimeStr)
-			}
 			c.Send <- pongMessage
 		case "echo":
 			// Echo the message back to the sender
