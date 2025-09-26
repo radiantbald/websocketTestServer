@@ -287,8 +287,22 @@ func (c *Client) ReadPump(hub *Hub) {
 			log.Printf("Chat message from %s: %s", c.Username, msg.Content)
 			hub.broadcast <- msg
 		case "ping":
-			// Ignore ping messages to prevent connection issues
-			// Do nothing - let client handle ping timeout
+			// Respond to ping with pong
+			pongMessage := Message{
+				Type:      "pong",
+				Content:   "pong",
+				Username:  "Server",
+				Timestamp: time.Now(),
+			}
+			// Отправляем pong без блокировки
+			go func() {
+				select {
+				case c.Send <- pongMessage:
+					// Pong sent successfully
+				case <-time.After(1 * time.Second):
+					// Timeout - client might be disconnected
+				}
+			}()
 		case "echo":
 			// Echo the message back to the sender
 			echoMessage := Message{
