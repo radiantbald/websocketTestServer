@@ -258,8 +258,9 @@ func (c *Client) ReadPump(hub *Hub) {
 
 		// log.Printf("Message received from %s: type=%s, content=%s", c.Username, msg.Type, msg.Content)
 
-		// Валидируем содержимое сообщения (кроме ping/pong)
-		if msg.Type != "ping" && msg.Type != "pong" {
+		// Валидируем содержимое сообщения (кроме ping/pong/echo)
+		log.Printf("DEBUG: Message type: %s, content: '%s'", msg.Type, msg.Content)
+		if msg.Type != "ping" && msg.Type != "pong" && msg.Type != "echo" {
 			validatedContent, err := validateMessageContent(msg.Content)
 			if err != nil {
 				log.Printf("Invalid message content from %s: %v", c.Username, err)
@@ -307,7 +308,8 @@ func (c *Client) ReadPump(hub *Hub) {
 			// Echo the exact message back to the sender
 			content := msg.Content
 			if content == "" {
-				content = "Пустое сообщение"
+				// Для пустого сообщения возвращаем пустую строку в кавычках
+				content = "\"\""
 			}
 			echoMessage := Message{
 				Type:      "echo",
