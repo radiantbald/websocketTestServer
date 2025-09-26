@@ -305,9 +305,13 @@ func (c *Client) ReadPump(hub *Hub) {
 			}()
 		case "echo":
 			// Echo the exact message back to the sender
+			content := msg.Content
+			if content == "" {
+				content = "Пустое сообщение"
+			}
 			echoMessage := Message{
 				Type:      "echo",
-				Content:   msg.Content, // Возвращаем точно то же содержимое
+				Content:   content,
 				Username:  "Server",
 				Timestamp: time.Now(),
 			}

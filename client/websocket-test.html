@@ -231,6 +231,11 @@
                         const pongTime = Date.now();
                         const responseTime = lastPingTime ? pongTime - lastPingTime : 0;
                         addMessage('system', `🏓 Pong получен от сервера (время отклика: ${responseTime}мс)`, 'system');
+                    } else if (message.type === 'echo') {
+                        // Специальная обработка для echo сообщений
+                        const isFromServer = message.username === 'Server';
+                        const className = isFromServer ? 'server' : 'received';
+                        addMessage('received', `🔄 Echo: ${message.content}`, className);
                     } else {
                         // Определяем стиль в зависимости от отправителя
                         const isFromServer = message.username === 'Server';
@@ -305,16 +310,12 @@
                 const input = document.getElementById('messageInput');
                 const content = input.value.trim();
                 
-                if (content === '') {
-                    addMessage('system', '🔄 Echo: Пустое сообщение', 'echo-sent');
-                    return;
-                }
-                
+                // Всегда отправляем на сервер, даже пустое сообщение
                 const message = { type: 'echo', content: content };
                 const messageStr = JSON.stringify(message);
                 console.log('🔄 Отправляем echo:', messageStr);
                 ws.send(messageStr);
-                addMessage('system', `🔄 Отправлен echo: "${content}"`, 'echo-sent');
+                addMessage('system', `🔄 Отправлен echo: "${content || 'пустое сообщение'}"`, 'echo-sent');
             }
         }
         
