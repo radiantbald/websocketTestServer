@@ -7,10 +7,12 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 100%;
+            width: 100%;
             margin: 0 auto;
             padding: 20px;
             background: #f5f5f5;
+            box-sizing: border-box;
         }
         .container {
             background: white;
@@ -152,17 +154,115 @@
             transform: translateY(0) scale(1);
             pointer-events: auto;
         }
+        
+        /* В состоянии подключения индикатор растягивается аналогично полю ввода имени */
+        .status.connected {
+            flex: 1 !important;
+            max-width: none !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Индикатор подключения растягивается на всю ширину на всех экранах */
+        .status.connected {
+            width: 100% !important;
+            flex: 1 !important;
+            max-width: none !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Кнопка отключения привязана к правой границе контейнера на всех экранах */
+        .status.connected + #connectBtn {
+            position: absolute !important;
+            right: 0 !important;
+            top: 0 !important;
+        }
+        
+        /* На десктопных экранах убираем все отступы у кнопки отключения */
+        @media (min-width: 601px) {
+            .status.connected + #connectBtn {
+                margin: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                right: 0 !important;
+                top: 0 !important;
+            }
+        }
+        
+        /* Индикатор статуса в состоянии отключения имеет фиксированную ширину */
+        .status.disconnected {
+            width: 120px !important;
+            flex: none !important;
+        }
+        
+        /* Кнопка подключения в состоянии отключения возвращается в нормальное положение */
+        .status.disconnected + #connectBtn {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+        }
+        
+        /* Мобильная версия для экранов менее 601px */
+        @media (max-width: 600px) {
+            .controls-container {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .controls-row {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+            
+            .controls-row.top {
+                justify-content: flex-start !important;
+            }
+            
+            .controls-row.bottom {
+                justify-content: flex-start !important;
+                gap: 10px !important;
+            }
+            
+            /* Индикатор статуса на второй строчке имеет максимальную ширину */
+            .controls-row.bottom .status {
+                max-width: none !important;
+                flex: 1 !important;
+            }
+            
+            
+            /* На мобильных экранах кнопка отключения позиционируется относительно */
+            .controls-row.bottom #connectBtn {
+                position: relative !important;
+                right: auto !important;
+                top: auto !important;
+                flex-shrink: 0 !important;
+            }
+            
+            
+        }
+        
+        
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🍭 Candy Chat</h1>
         
-        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-            <button onclick="document.getElementById('username').value = getRandomCharacter()" title="Случайное имя">🎲</button>
-            <input type="text" id="username" placeholder="Имя пользователя" value="" style="flex: 1;">
-            <div id="status" class="status disconnected" style="width: 120px; flex-shrink: 0;">Отключено</div>
-            <button id="connectBtn" onclick="toggleConnection()" style="width: 140px; flex-shrink: 0;">Подключиться</button>
+        <div class="controls-container" style="display: flex; align-items: center; gap: 10px; margin: 10px 0; width: 100%; position: relative;">
+            <div class="controls-row top" style="display: flex; align-items: center; flex: 1; gap: 10px;">
+                <button onclick="document.getElementById('username').value = getRandomCharacter()" title="Случайное имя" style="margin: 0; flex-shrink: 0; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">🎲</button>
+                <input type="text" id="username" placeholder="Имя пользователя" value="" style="flex: 1; margin: 0; min-width: 120px; max-width: none;">
+            </div>
+            <div class="controls-row bottom" style="display: flex; align-items: center; gap: 10px;">
+                <div id="status" class="status disconnected" style="width: 120px; flex-shrink: 0; margin: 0;">Отключено</div>
+                <button id="connectBtn" onclick="toggleConnection()" style="width: 120px; flex-shrink: 0; margin: 0;">Подключиться</button>
+            </div>
         </div>
         
         <div class="messages" id="messages"></div>
@@ -241,31 +341,83 @@
             }
         });
         
+        // Модуль для состояния подключения
+        function applyConnectedState() {
+            const messageSection = document.getElementById('messageSection');
+            const randomButton = document.querySelector('button[onclick*="getRandomCharacter"]');
+            const usernameInput = document.getElementById('username');
+            const connectBtn = document.getElementById('connectBtn');
+            const statusEl = document.getElementById('status');
+            const topRow = document.querySelector('.controls-row.top');
+            
+            // Показываем секцию сообщений
+            messageSection.style.display = 'flex';
+            
+            // Скрываем элементы управления подключением
+            if (topRow) topRow.style.display = 'none';
+            if (randomButton) randomButton.style.display = 'none';
+            if (usernameInput) usernameInput.style.display = 'none';
+            
+            // Настраиваем индикатор статуса
+            statusEl.style.marginLeft = '0';
+            statusEl.style.marginRight = '0';
+            statusEl.style.width = '';
+            statusEl.style.flex = '';
+            
+            // Настраиваем кнопку отключения
+            if (connectBtn) {
+                connectBtn.style.position = '';
+                connectBtn.style.right = '';
+                connectBtn.style.top = '';
+                connectBtn.style.marginLeft = '0';
+                connectBtn.style.marginRight = '0';
+            }
+        }
+        
+        // Модуль для состояния отключения
+        function applyDisconnectedState() {
+            const messageSection = document.getElementById('messageSection');
+            const randomButton = document.querySelector('button[onclick*="getRandomCharacter"]');
+            const usernameInput = document.getElementById('username');
+            const connectBtn = document.getElementById('connectBtn');
+            const statusEl = document.getElementById('status');
+            const topRow = document.querySelector('.controls-row.top');
+            
+            // Скрываем секцию сообщений
+            messageSection.style.display = 'none';
+            
+            // Показываем элементы управления подключением
+            if (topRow) topRow.style.display = 'flex';
+            if (randomButton) randomButton.style.display = 'flex';
+            if (usernameInput) usernameInput.style.display = 'block';
+            
+            // Настраиваем индикатор статуса
+            statusEl.style.marginLeft = '0';
+            statusEl.style.marginRight = '0';
+            statusEl.style.width = '';
+            statusEl.style.flex = '';
+            
+            // Настраиваем кнопку подключения
+            if (connectBtn) {
+                connectBtn.style.position = '';
+                connectBtn.style.right = '';
+                connectBtn.style.top = '';
+                connectBtn.style.marginLeft = '0';
+                connectBtn.style.marginRight = '0';
+            }
+        }
+        
+        // Основная функция обновления статуса
         function updateStatus(status, className) {
             const statusEl = document.getElementById('status');
             statusEl.textContent = status;
             statusEl.className = `status ${className}`;
             
-            const messageSection = document.getElementById('messageSection');
-            const randomButton = document.querySelector('button[onclick*="getRandomCharacter"]');
-            const usernameInput = document.getElementById('username');
-            
+            // Применяем соответствующий модуль состояния
             if (className === 'connected') {
-                messageSection.style.display = 'flex';
-                // Скрываем кнопку рандомайзера и поле ввода имени при подключении
-                if (randomButton) randomButton.style.display = 'none';
-                if (usernameInput) usernameInput.style.display = 'none';
-                // Растягиваем индикатор статуса по ширине экрана при подключении
-                statusEl.style.width = '100%';
-                statusEl.style.flex = '1';
+                applyConnectedState();
             } else {
-                messageSection.style.display = 'none';
-                // Показываем кнопку рандомайзера и поле ввода имени при отключении
-                if (randomButton) randomButton.style.display = 'flex';
-                if (usernameInput) usernameInput.style.display = 'block';
-                // Возвращаем фиксированную ширину для индикатора статуса при отключении
-                statusEl.style.width = '120px';
-                statusEl.style.flex = 'none';
+                applyDisconnectedState();
             }
         }
         
